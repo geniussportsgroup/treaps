@@ -556,6 +556,7 @@ func rotateLeft(p *Node) *Node {
 	return q
 }
 
+// Iterator on Treap. Traversal is ordered
 type Iterator struct {
 	root *Node
 	curr *Node
