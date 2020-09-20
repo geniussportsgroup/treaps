@@ -1,5 +1,5 @@
 // Package Treap exports a ordered set of arbitrary keys implemented through treaps.
-// A treap is a kind of balanced binary search tree where their operations are O(log n).
+// A treap is a kind of balanced binary Search tree where their operations are O(log n).
 package treaps
 
 import (
@@ -43,8 +43,8 @@ type Treap struct {
 	less          func(i1, i2 interface{}) bool
 }
 
-// swap two treaps in O(1)
-func (tree *Treap) swap(rhs *Treap) {
+// Swap two treaps in O(1)
+func (tree *Treap) Swap(rhs *Treap) {
 	tree.seed, rhs.seed = rhs.seed, tree.seed
 	tree.randGenerator, rhs.randGenerator = rhs.randGenerator, tree.randGenerator
 	tree.rootPtr, rhs.rootPtr = rhs.rootPtr, tree.rootPtr
@@ -74,7 +74,7 @@ func NewTreap(less func(i1, i2 interface{}) bool) *Treap {
 	return New(time.Now().UTC().UnixNano(), less)
 }
 
-// Helper function that perform an exact topological copy of tree rooted by p
+// Helper function that perform an exact topological Copy of tree rooted by p
 func __copy(p *Node) *Node {
 
 	if p == nullNodePtr {
@@ -90,8 +90,8 @@ func __copy(p *Node) *Node {
 	}
 }
 
-// Get an exact copy of tree
-func (tree *Treap) copy() *Treap {
+// Get an exact Copy of tree
+func (tree *Treap) Copy() *Treap {
 
 	ret := New(tree.seed, tree.less)
 	*ret.rootPtr = __copy(*tree.rootPtr)
@@ -120,7 +120,7 @@ func __topologicalEqual(t1, t2 *Node, less func(i1, i2 interface{}) bool) bool {
 }
 
 // Return true if tree is topologically equivalent to rhs
-func (tree *Treap) topologicalEqual(rhs *Treap) bool {
+func (tree *Treap) TopologicalEqual(rhs *Treap) bool {
 	return __topologicalEqual(*tree.rootPtr, *rhs.rootPtr, tree.less)
 }
 
@@ -165,7 +165,7 @@ func __insertNode(root, p *Node, less func(i1, i2 interface{}) bool) *Node {
 
 // Insert item into the tree. Return nil if key is already contained; otherwise
 // returns the value of the just inserted item
-func (tree *Treap) insert(item interface{}) interface{} {
+func (tree *Treap) Insert(item interface{}) interface{} {
 
 	p := &Node{
 		key:      item,
@@ -186,7 +186,7 @@ func (tree *Treap) insert(item interface{}) interface{} {
 
 // Search in tree key. If key is found, then the value contained in the set is returned.
 // Otherwise, the key was not found, nil value is returned
-func (tree *Treap) search(key interface{}) interface{} {
+func (tree *Treap) Search(key interface{}) interface{} {
 
 	root := *tree.rootPtr
 	for root != nullNodePtr {
@@ -207,7 +207,7 @@ func (tree *Treap) search(key interface{}) interface{} {
 	return root.key
 }
 
-// Helper function for searching a node and eventually insert it into the tree if it is not found
+// Helper function for searching a node and eventually Insert it into the tree if it is not found
 func __searchOrInsertNode(root **Node, p *Node, less func(i1, i2 interface{}) bool) *Node {
 
 	if *root == nullNodePtr {
@@ -242,7 +242,7 @@ func __searchOrInsertNode(root **Node, p *Node, less func(i1, i2 interface{}) bo
 
 // Search in tree item. If it is found, then the pair (false, item-value) is returned.
 // Otherwise, the item is inserted into the tree and the pair (true, item) is returned
-func (tree *Treap) searchOrInsert(item interface{}) (bool, interface{}) {
+func (tree *Treap) SearchOrInsert(item interface{}) (bool, interface{}) {
 
 	p := &Node{
 		key:      item,
@@ -293,7 +293,7 @@ func __remove(rootPtr **Node, key interface{}, less func(i1, i2 interface{}) boo
 
 // Remove key from the tree. Return the removed value if the removal was successful.
 // Otherwise, the item was not found and the value nil is returned as signal of the failure
-func (tree *Treap) remove(key interface{}) interface{} {
+func (tree *Treap) Remove(key interface{}) interface{} {
 
 	retVal := __remove(tree.rootPtr, key, tree.less)
 	if retVal == nullNodePtr {
@@ -304,7 +304,7 @@ func (tree *Treap) remove(key interface{}) interface{} {
 }
 
 // Return the smallest item contained in the tree
-func (tree *Treap) min() interface{} {
+func (tree *Treap) Min() interface{} {
 
 	root := *tree.rootPtr
 	if root == nullNodePtr {
@@ -319,7 +319,7 @@ func (tree *Treap) min() interface{} {
 }
 
 // Return the greatest item contained in the tree
-func (tree *Treap) max() interface{} {
+func (tree *Treap) Max() interface{} {
 
 	root := *tree.rootPtr
 	if root == nullNodePtr {
@@ -334,7 +334,7 @@ func (tree *Treap) max() interface{} {
 }
 
 // Return in O(1) the number of keys contained in the tree
-func (tree *Treap) size() int { return (*tree.rootPtr).count }
+func (tree *Treap) Size() int { return (*tree.rootPtr).count }
 
 // Helper function for splitting a tree according to key. The function returns two new trees.
 // tsRoot contains all the keys less than key and tgRoot contains the keys greater or equal to
@@ -362,10 +362,10 @@ func __splitByKeyDup(root *Node, key interface{},
 	return tsRoot, tgRoot
 }
 
-// split tree in two trees tsTree and tgTres. tsTree contains all the keys of tree in
-// [tree.min(), key> and tgTree contains those ones in [key, tree.max]. After completion,
+// SplitByKey tree in two trees tsTree and tgTres. tsTree contains all the keys of tree in
+// [tree.Min(), key> and tgTree contains those ones in [key, tree.Max]. After completion,
 // tree becomes empty.
-func (tree *Treap) split(key interface{}) (tsTree, tgTree *Treap) {
+func (tree *Treap) SplitByKey(key interface{}) (tsTree, tgTree *Treap) {
 
 	tsTree = New(tree.seed, tree.less)
 	tgTree = New(tree.seed, tree.less)
@@ -403,10 +403,12 @@ func __joinExclusive(tsRootPtr, tgRootPtr **Node) *Node {
 
 // join exclusive of tsTree with tgTree. Equivalent to append tgTree to tsTree.
 // tgTree must be greater than tsTree. Panic is thrown if this condition is not met
-func (tsTree *Treap) joinExclusive(tgTree *Treap) {
-	if !tsTree.less(tsTree.max(), tgTree.min()) {
+func (tsTree *Treap) JoinExclusive(tgTree *Treap) {
+
+	if tsTree.Size() != 0 && tgTree.Size() != 0 && !tsTree.less(tsTree.Max(), tgTree.Min()) {
 		panic("Trees are not range-disjoint")
 	}
+
 	*tsTree.rootPtr = __joinExclusive(tsTree.rootPtr, tgTree.rootPtr)
 	*tgTree.rootPtr = nullNodePtr
 }
@@ -414,7 +416,7 @@ func (tsTree *Treap) joinExclusive(tgTree *Treap) {
 // Return the key located in the position pos respect to the order of the keys.
 // The item is retrieved in O(log n) expected time.
 // Panic if pos is greater or equal to the number of elements stored into the tree
-func (tree *Treap) choose(pos int) interface{} {
+func (tree *Treap) Choose(pos int) interface{} {
 
 	root := *tree.rootPtr
 	if pos >= root.count {
@@ -461,14 +463,14 @@ func __rank(root *Node, key interface{}, less func(i1, i2 interface{}) bool) int
 // order of all keys stored in the tree. Otherwise, the method returns (false, Undetermined)
 // for indicating that the key is not in the tree.
 // The computation spends O(log n) expected time
-func (tree *Treap) rank(key interface{}) (ok bool, pos int) {
+func (tree *Treap) RankInOrder(key interface{}) (ok bool, pos int) {
 
 	pos = __rank(*tree.rootPtr, key, tree.less)
 	ok = pos != notFound
 	return
 }
 
-// Helper that split tree root by position i. i - 1 first minor keys are returned in l,
+// Helper that SplitByKey tree root by position i. i - 1 first minor keys are returned in l,
 // while keys the following in r
 func __splitPos(root *Node, i int) (l, r *Node) {
 
@@ -496,8 +498,8 @@ func __splitPos(root *Node, i int) (l, r *Node) {
 	return
 }
 
-// split tree in ts = [min, i) and tg = [i, max). After operation tree becomes empty
-func (tree *Treap) splitPos(i int) (ts, tg *Treap) {
+// SplitByKey tree in ts = [Min, i) and tg = [i, Max). After operation tree becomes empty
+func (tree *Treap) SplitByPosition(i int) (ts, tg *Treap) {
 
 	root := *tree.rootPtr
 	if i > root.count {
@@ -521,19 +523,19 @@ func (tree *Treap) splitPos(i int) (ts, tg *Treap) {
 }
 
 // Extract from tree all the keys in [beginPos, endPos). tree looses the extracted range
-func (tree *Treap) extractRange(beginPos, endPos int) *Treap {
+func (tree *Treap) ExtractRange(beginPos, endPos int) *Treap {
 
 	if beginPos > endPos || endPos > (*tree.rootPtr).count-1 {
 		panic(fmt.Sprintf("Invalid positions %d %d respect to number of keys %d",
 			beginPos, endPos, (*tree.rootPtr).count))
 	}
 
-	treeAux, endTree := tree.splitPos(endPos)
-	beginTree, result := treeAux.splitPos(beginPos)
+	treeAux, endTree := tree.SplitByPosition(endPos)
+	beginTree, result := treeAux.SplitByPosition(beginPos)
 
-	beginTree.joinExclusive(endTree)
+	beginTree.JoinExclusive(endTree)
 
-	tree.swap(beginTree)
+	tree.Swap(beginTree)
 
 	return result
 }
@@ -600,29 +602,29 @@ func NewIterator(tree *Treap) *Iterator {
 	return it
 }
 
-func (it *Iterator) resetFirst() {
+func (it *Iterator) ResetFirst() {
 	emptyStack(it)
 	initialize(it)
 }
 
-func (it *Iterator) resetLast() {
+func (it *Iterator) ResetLast() {
 	emptyStack(it)
 	advanceToMax(it, it.root)
 }
 
-func (it *Iterator) hasCurr() bool {
+func (it *Iterator) HasCurr() bool {
 	return it.curr != nullNodePtr
 }
 
-func (it *Iterator) getCurr() interface{} {
-	if !it.hasCurr() {
+func (it *Iterator) GetCurr() interface{} {
+	if !it.HasCurr() {
 		panic("Iterator has not current item")
 	}
 	return it.curr.key
 }
 
-func (it *Iterator) next() {
-	if !it.hasCurr() {
+func (it *Iterator) Next() {
+	if !it.HasCurr() {
 		panic("Iterator has not current item")
 	}
 	it.curr = it.curr.rlink
@@ -637,6 +639,8 @@ func (it *Iterator) next() {
 		it.curr = it.s.Pop().(*Node)
 	}
 }
+
+// TODO Implement Prev method
 
 // Simple BST checker; Not completely correct
 func checkBST(node *Node, less func(i1, i2 interface{}) bool) bool {
