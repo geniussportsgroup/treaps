@@ -23,7 +23,7 @@ func TestNewTreap(t *testing.T) {
 
 	s := New(9, cmpInt)
 	assert.NotNil(t, s)
-	assert.Equal(t, 0, s.size())
+	assert.Equal(t, 0, s.Size())
 }
 
 func TestTreap_insert(t *testing.T) {
@@ -57,7 +57,7 @@ func TestRandomInsertions(t *testing.T) {
 		assert.Equal(t, val, tree.Search(val))
 	}
 
-	assert.Equal(t, N, int(tree.size()))
+	assert.Equal(t, N, int(tree.Size()))
 }
 
 func TestTreap_remove(t *testing.T) {
@@ -66,7 +66,7 @@ func TestTreap_remove(t *testing.T) {
 
 	insertNRandomItems(tree, N)
 
-	values := make([]int, 0, tree.size())
+	values := make([]int, 0, tree.Size())
 	for it := NewIterator(tree); it.HasCurr(); it.Next() {
 		values = append(values, it.GetCurr().(int))
 	}
@@ -86,8 +86,8 @@ func TestTreap_split(t *testing.T) {
 
 	t1, t2 := tree.SplitByKey(552)
 
-	assert.Equal(t, N, t1.size()+t2.size())
-	assert.Equal(t, 0, tree.size())
+	assert.Equal(t, N, t1.Size()+t2.Size())
+	assert.Equal(t, 0, tree.Size())
 
 	for it := NewIterator(t1); it.HasCurr(); it.Next() {
 		fmt.Print(it.GetCurr(), " ")
@@ -107,8 +107,8 @@ func TestTreap_split(t *testing.T) {
 	fmt.Println()
 
 	tree.JoinExclusive(t2)
-	assert.Equal(t, 0, t1.size())
-	assert.Equal(t, 0, t2.size())
+	assert.Equal(t, 0, t1.Size())
+	assert.Equal(t, 0, t2.Size())
 
 	for it := NewIterator(tree); it.HasCurr(); it.Next() {
 		fmt.Print(it.GetCurr(), " ")
@@ -131,8 +131,8 @@ func TestTreap_searchOrInsert(t *testing.T) {
 		}
 	}
 
-	fmt.Println("tree.size() = ", tree.size())
-	fmt.Println("failures.size() = ", failures.size())
+	fmt.Println("tree.Size() = ", tree.Size())
+	fmt.Println("failures.Size() = ", failures.Size())
 
 	for it := NewIterator(failures); it.HasCurr(); it.Next() {
 		assert.Equal(t, tree.Search(it.GetCurr()), it.GetCurr())
@@ -185,11 +185,11 @@ func TestTreap_splitPos(t *testing.T) {
 	}
 	fmt.Println()
 
-	assert.Equal(t, 0, tree.size())
+	assert.Equal(t, 0, tree.Size())
 	assert.NotNil(t, t1)
 	assert.NotNil(t, t2)
-	assert.Equal(t, N/2, t1.size())
-	assert.Equal(t, N/2, t2.size())
+	assert.Equal(t, N/2, t1.Size())
+	assert.Equal(t, N/2, t2.Size())
 	assert.Equal(t, min1, t1.Min())
 	assert.Equal(t, max1, t1.Max())
 	assert.Equal(t, min2, t2.Min())

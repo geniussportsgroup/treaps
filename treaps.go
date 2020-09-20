@@ -334,7 +334,7 @@ func (tree *Treap) Max() interface{} {
 }
 
 // Return in O(1) the number of keys contained in the tree
-func (tree *Treap) size() int { return (*tree.rootPtr).count }
+func (tree *Treap) Size() int { return (*tree.rootPtr).count }
 
 // Helper function for splitting a tree according to key. The function returns two new trees.
 // tsRoot contains all the keys less than key and tgRoot contains the keys greater or equal to
@@ -404,9 +404,11 @@ func __joinExclusive(tsRootPtr, tgRootPtr **Node) *Node {
 // join exclusive of tsTree with tgTree. Equivalent to append tgTree to tsTree.
 // tgTree must be greater than tsTree. Panic is thrown if this condition is not met
 func (tsTree *Treap) JoinExclusive(tgTree *Treap) {
-	if !tsTree.less(tsTree.Max(), tgTree.Min()) {
+
+	if tsTree.Size() != 0 && tgTree.Size() != 0 && !tsTree.less(tsTree.Max(), tgTree.Min()) {
 		panic("Trees are not range-disjoint")
 	}
+
 	*tsTree.rootPtr = __joinExclusive(tsTree.rootPtr, tgTree.rootPtr)
 	*tgTree.rootPtr = nullNodePtr
 }
