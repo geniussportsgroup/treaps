@@ -184,6 +184,61 @@ func (tree *Treap) Insert(item interface{}) interface{} {
 	return p.key
 }
 
+// Helper for inserting node p into the tree root. BST order is handled through less function.
+// key stored in p can be already present in the tree,. In this case, The key will be duplicated
+func __insertNodeDup(root, p *Node, less func(i1, i2 interface{}) bool) *Node {
+
+	if root == nullNodePtr {
+		return p
+	}
+
+	resultNode := nullNodePtr
+	if less(p.key, root.key) {
+		resultNode = __insertNodeDup(root.llink, p, less)
+		if resultNode == nullNodePtr { // was p inserted?
+			return nullNodePtr // key is already in tree ==> insertion fails
+		}
+
+		root.llink = resultNode
+		root.count++
+		if resultNode.priority < root.priority {
+			root = rotateRight(root)
+		}
+		return root
+	}
+
+	resultNode = __insertNodeDup(root.rlink, p, less)
+	if resultNode == nullNodePtr { // was p inserted?
+		return nullNodePtr // key is already in tree ==> insertion fails
+	}
+
+	root.rlink = resultNode
+	root.count++
+	if resultNode.priority < root.priority {
+		root = rotateLeft(root)
+	}
+
+	return root
+}
+
+// Insert item into the tree. Return nil if key is already contained; otherwise
+// returns the value of the just inserted item
+func (tree *Treap) InsertDup(item interface{}) interface{} {
+
+	p := &Node{
+		key:      item,
+		priority: tree.randGenerator.Uint64(),
+		count:    1,
+		llink:    nullNodePtr,
+		rlink:    nullNodePtr,
+	}
+
+	result := __insertNodeDup(*tree.rootPtr, p, tree.less)
+
+	*tree.rootPtr = result
+	return p.key
+}
+
 // Search in tree key. If key is found, then the value contained in the set is returned.
 // Otherwise, the key was not found, nil value is returned
 func (tree *Treap) Search(key interface{}) interface{} {
@@ -540,6 +595,7 @@ func (tree *Treap) ExtractRange(beginPos, endPos int) *Treap {
 	return result
 }
 
+// Rotate p to the right. Left child becomes root
 func rotateRight(p *Node) *Node {
 	q := p.llink
 	p.llink = q.rlink
@@ -549,6 +605,7 @@ func rotateRight(p *Node) *Node {
 	return q
 }
 
+// Rotate p to the left. Right child becomes root
 func rotateLeft(p *Node) *Node {
 	q := p.rlink
 	p.rlink = q.llink
@@ -592,6 +649,7 @@ func initialize(it *Iterator) {
 	}
 }
 
+// Return a iterator on the treap tree
 func NewIterator(tree *Treap) *Iterator {
 	it := &Iterator{
 		root: *tree.rootPtr,
@@ -602,20 +660,24 @@ func NewIterator(tree *Treap) *Iterator {
 	return it
 }
 
+// Reset the iterator to the first item of the set
 func (it *Iterator) ResetFirst() {
 	emptyStack(it)
 	initialize(it)
 }
 
+// Reset the iterator to the last item of the set
 func (it *Iterator) ResetLast() {
 	emptyStack(it)
 	advanceToMax(it, it.root)
 }
 
+// Return true if iterator is positioned on an item. Otherwise it return false
 func (it *Iterator) HasCurr() bool {
 	return it.curr != nullNodePtr
 }
 
+// Return the current item on which the iterator is positioned. Panic if there is not current item
 func (it *Iterator) GetCurr() interface{} {
 	if !it.HasCurr() {
 		panic("Iterator has not current item")
@@ -623,14 +685,15 @@ func (it *Iterator) GetCurr() interface{} {
 	return it.curr.key
 }
 
-func (it *Iterator) Next() {
+// Advance iterator to the next item in the ordered sequence
+func (it *Iterator) Next() *Iterator {
 	if !it.HasCurr() {
 		panic("Iterator has not current item")
 	}
 	it.curr = it.curr.rlink
 	if it.curr != nullNodePtr {
 		it.curr = advanceToMin(it, it.curr)
-		return
+		return it
 	}
 
 	if it.s.Len() == 0 {
@@ -638,6 +701,8 @@ func (it *Iterator) Next() {
 	} else {
 		it.curr = it.s.Pop().(*Node)
 	}
+
+	return it
 }
 
 // TODO Implement Prev method
