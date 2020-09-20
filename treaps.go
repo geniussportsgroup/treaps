@@ -525,15 +525,14 @@ func (tree *Treap) RankInOrder(key interface{}) (ok bool, pos int) {
 	return
 }
 
-// Helper that SplitByKey tree root by position i. i - 1 first minor keys are returned in l,
-// while keys the following in r
+// Helper that SplitByKey tree root by position i. l = [0, i] r = [i + 1, N - 1]
 func __splitPos(root *Node, i int) (l, r *Node) {
 
 	if i == root.llink.count {
-		l = root.llink
-		root.llink = nullNodePtr
-		r = root
-		r.count -= l.count
+		l = root
+		r = root.rlink
+		l.rlink = nullNodePtr
+		l.count -= r.count
 		return
 	}
 
@@ -553,19 +552,19 @@ func __splitPos(root *Node, i int) (l, r *Node) {
 	return
 }
 
-// SplitByKey tree in ts = [Min, i) and tg = [i, Max). After operation tree becomes empty
+// SplitByKey tree in ts = [Min, i] and tg = (i, Max). After operation tree becomes empty
 func (tree *Treap) SplitByPosition(i int) (ts, tg *Treap) {
 
 	root := *tree.rootPtr
-	if i > root.count {
-		panic(fmt.Sprintf("Posistion %d out of range", i))
+	if i < 0 || i >= root.count {
+		panic(fmt.Sprintf("Position %d out of range", i))
 	}
 
 	ts = New(tree.seed, tree.less)
 	tg = New(tree.seed, tree.less)
 
-	if i == root.count {
-		ts.rootPtr = tree.rootPtr
+	if i == root.count-1 {
+		*ts.rootPtr = *tree.rootPtr
 		*tree.rootPtr = nullNodePtr
 		*tg.rootPtr = nullNodePtr
 		return
@@ -577,7 +576,7 @@ func (tree *Treap) SplitByPosition(i int) (ts, tg *Treap) {
 	return
 }
 
-// Extract from tree all the keys in [beginPos, endPos). tree looses the extracted range
+// Extract from tree all the keys in [beginPos, endPos]. tree looses the extracted range
 func (tree *Treap) ExtractRange(beginPos, endPos int) *Treap {
 
 	if beginPos > endPos || endPos > (*tree.rootPtr).count-1 {
@@ -585,8 +584,12 @@ func (tree *Treap) ExtractRange(beginPos, endPos int) *Treap {
 			beginPos, endPos, (*tree.rootPtr).count))
 	}
 
+	begPos := beginPos - 1
+	if beginPos == 0 {
+		begPos = 0
+	}
 	treeAux, endTree := tree.SplitByPosition(endPos)
-	beginTree, result := treeAux.SplitByPosition(beginPos)
+	beginTree, result := treeAux.SplitByPosition(begPos)
 
 	beginTree.JoinExclusive(endTree)
 
@@ -646,6 +649,8 @@ func emptyStack(it *Iterator) {
 func initialize(it *Iterator) {
 	if it.root != nullNodePtr {
 		it.curr = advanceToMin(it, it.root)
+	} else {
+		it.curr = nullNodePtr
 	}
 }
 

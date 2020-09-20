@@ -169,31 +169,80 @@ func TestTreap_rank(t *testing.T) {
 func TestTreap_splitPos(t *testing.T) {
 	tree := New(1, cmpInt)
 	const N = 100
-	insertNRandomItems(tree, N)
+	for i := 0; i < N; i++ {
+		tree.Insert(i)
+	}
 
-	min1, max1, min2, max2 := tree.Min(), tree.Choose(N/2-1), tree.Choose(N/2), tree.Max()
+	min1, max1, min2, max2 := tree.Min(), tree.Choose(N/2), tree.Choose(N/2+1), tree.Max()
 
 	t1, t2 := tree.SplitByPosition(N / 2)
 
+	assert.Equal(t, 0, tree.Size())
+	assert.NotNil(t, t1)
+	assert.NotNil(t, t2)
+	assert.Equal(t, N/2+1, t1.Size())
+	assert.Equal(t, N/2-1, t2.Size())
+	assert.Equal(t, min1, t1.Min())
+	assert.Equal(t, max1, t1.Max())
+	assert.Equal(t, min2, t2.Min())
+	assert.Equal(t, max2, t2.Max())
+
+	for i, it := 0, NewIterator(t1); it.HasCurr(); i, it = i+1, it.Next() {
+		assert.Equal(t, i, it.GetCurr().(int))
+	}
+
+	for i, it := N/2+1, NewIterator(t2); it.HasCurr(); i, it = i+1, it.Next() {
+		assert.Equal(t, i, it.GetCurr().(int))
+	}
+
+	t0, t1 := t1.SplitByPosition(0)
+	for i, it := 0, NewIterator(t0); it.HasCurr(); i, it = i+1, it.Next() {
+		assert.Equal(t, i, it.GetCurr())
+	}
+
+	for i, it := 1, NewIterator(t1); it.HasCurr(); i, it = i+1, it.Next() {
+		assert.Equal(t, i, it.GetCurr())
+	}
+}
+
+func TestTreap_SplitByPositionCorners(t *testing.T) {
+	tree := New(1, cmpInt)
+	const N = 100
+	for i := 0; i < N; i++ {
+		tree.Insert(i)
+	}
+
+	t1, t2 := tree.SplitByPosition(tree.Size() - 1)
+	assert.Equal(t, N, t1.Size())
+	assert.Equal(t, 0, t2.Size())
+	for i, it := 0, NewIterator(t1); i < N; i, it = i+1, it.Next() {
+		assert.Equal(t, i, it.GetCurr())
+	}
+
+	t1, t2 = t1.SplitByPosition(0)
+	assert.Equal(t, 1, t1.Size())
+	assert.Equal(t, N-1, t2.Size())
+	assert.Equal(t, 0, t1.Min())
+	for i, it := 1, NewIterator(t2); it.HasCurr(); i, it = i+1, it.Next() {
+		assert.Equal(t, i, it.GetCurr())
+	}
+
+	t1, t2 = t2.SplitByPosition(0)
+	assert.Equal(t, 1, t1.Size())
+	assert.Equal(t, 1, t1.Min())
+	assert.Equal(t, N-2, t2.Size())
+	for i, it := 2, NewIterator(t2); it.HasCurr(); i, it = i+1, it.Next() {
+		assert.Equal(t, i, it.GetCurr())
+	}
+
+	t1, t2 = t2.SplitByPosition(t2.Size() - 2)
+	assert.Equal(t, N-3, t1.Size())
+	assert.Equal(t, 1, t2.Size())
 	for it := NewIterator(t1); it.HasCurr(); it.Next() {
 		fmt.Print(it.GetCurr(), " ")
 	}
 	fmt.Println()
 
-	for it := NewIterator(t2); it.HasCurr(); it.Next() {
-		fmt.Print(it.GetCurr(), " ")
-	}
-	fmt.Println()
-
-	assert.Equal(t, 0, tree.Size())
-	assert.NotNil(t, t1)
-	assert.NotNil(t, t2)
-	assert.Equal(t, N/2, t1.Size())
-	assert.Equal(t, N/2, t2.Size())
-	assert.Equal(t, min1, t1.Min())
-	assert.Equal(t, max1, t1.Max())
-	assert.Equal(t, min2, t2.Min())
-	assert.Equal(t, max2, t2.Max())
 }
 
 func TestTreap_copy(t *testing.T) {
@@ -233,11 +282,16 @@ func TestTreap_removeRange(t *testing.T) {
 		assert.Equal(t, key, it.GetCurr())
 		key++
 	}
-	fmt.Println()
+}
 
-	for it := NewIterator(tree); it.HasCurr(); it.Next() {
-		fmt.Print(it.GetCurr(), " ")
+func TestTreap_ExtractRangeCorners(t *testing.T) {
+	tree := New(2, cmpInt)
+	const N = 100
+	for i := 0; i < N; i++ {
+		tree.Insert(i)
 	}
-	fmt.Println()
 
+	res := tree.ExtractRange(0, tree.Size()-1)
+	assert.Equal(t, N, res.Size())
+	assert.Equal(t, 0, tree.Size())
 }
