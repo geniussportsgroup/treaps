@@ -295,3 +295,22 @@ func TestTreap_ExtractRangeCorners(t *testing.T) {
 	assert.Equal(t, N, res.Size())
 	assert.Equal(t, 0, tree.Size())
 }
+
+func TestTreap_IteratorNext(t *testing.T) {
+	tree := New(3, cmpInt)
+	const N = 100
+	for i := 0; i < N; i++ {
+		tree.Insert(i)
+	}
+
+	i, it := 0, NewIterator(tree)
+	for ; it.HasCurr(); i, it = i+1, it.Next() {
+		assert.Equal(t, i, it.GetCurr())
+	}
+	assert.Equal(t, i, N)
+
+	for i, it = N-1, it.Prev(); it.HasCurr(); i, it = i-1, it.Prev() {
+		assert.Equal(t, i, it.GetCurr())
+	}
+	assert.Equal(t, i, -1)
+}

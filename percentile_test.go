@@ -1,7 +1,7 @@
 package treaps
 
 import (
-	"fmt"
+	"github.com/stretchr/testify/assert"
 	"math/rand"
 	"testing"
 )
@@ -16,7 +16,7 @@ type Sample struct {
 
 const N = int(1e6)
 
-func createSamples() *Treap {
+func createSamples(n int) *Treap {
 
 	set := NewTreap(func(i1, i2 interface{}) bool {
 		p1, ok := i1.(*Sample)
@@ -45,25 +45,29 @@ func createSamples() *Treap {
 
 func TestExample_99Percentiles(t *testing.T) {
 
-	set := createSamples()
+	set := createSamples(N)
 
-	percentile99 := int((set.Size() * 99) / 100) // index of first item belonging to 99 percentile
+	posOfPercentile99 := int((set.Size() * 99) / 100) // index of first item belonging to 99 percentile
 
 	// we have two ways for getting the samples included in the 99 percentile
+
+	percentile99Size := set.Size() - posOfPercentile99
 
 	// First we can use the method choose(i) for getting all the samples. This way has complexity
 	// O(n log(N)) where n is the n ~ 0.01*N and N is the number of samples
 	p99Slice := make([]Sample, 0)
-	for i := percentile99; i < set.Size(); i++ {
+	for i := posOfPercentile99; i < set.Size(); i++ {
 		samplePtr := set.Choose(i)
 		p99Slice = append(p99Slice, *samplePtr.(*Sample))
 	}
 
 	// The second method is just to extract the whole percentile from the set, with the eventual
-	// disadvantage that the set is modified
-	p99 := set.ExtractRange(percentile99, set.Size())
+	// disadvantage that the set is modified, but with the advantage that
+	p99 := set.ExtractRange(posOfPercentile99, set.Size()-1)
+
+	assert.Equal(t, percentile99Size, p99.Size())
 
 	for i, it := 0, NewIterator(p99); i < len(p99Slice); i, it = i+1, it.Next() {
-		fmt.Println(p99Slice[i].id, it.GetCurr().(*Sample).id)
+		assert.Equal(t, p99Slice[i].id, it.GetCurr().(*Sample).id)
 	}
 }

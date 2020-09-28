@@ -7,8 +7,6 @@ import (
 	"math"
 	"math/rand"
 	"time"
-
-	"github.com/golang-collections/collections/stack"
 )
 
 const notFound = -1
@@ -468,6 +466,19 @@ func (tsTree *Treap) JoinExclusive(tgTree *Treap) {
 	*tgTree.rootPtr = nullNodePtr
 }
 
+func __choose(root *Node, pos int) *Node {
+
+	for i := pos; i != root.llink.count; {
+		if i < root.llink.count {
+			root = root.llink
+		} else {
+			i -= root.llink.count + 1
+			root = root.rlink
+		}
+	}
+	return root
+}
+
 // Return the key located in the position pos respect to the order of the keys.
 // The item is retrieved in O(log n) expected time.
 // Panic if pos is greater or equal to the number of elements stored into the tree
@@ -478,16 +489,7 @@ func (tree *Treap) Choose(pos int) interface{} {
 		panic(fmt.Sprintf("Position %d out of range", pos))
 	}
 
-	for i := pos; i != root.llink.count; {
-		if i < root.llink.count {
-			root = root.llink
-		} else {
-			i -= root.llink.count + 1
-			root = root.rlink
-		}
-	}
-
-	return root.key
+	return __choose(*tree.rootPtr, pos).key
 }
 
 // Helper that computes the position of key respect to the ordered kes stored in the tree
@@ -622,36 +624,16 @@ func rotateLeft(p *Node) *Node {
 type Iterator struct {
 	root *Node
 	curr *Node
-	s    stack.Stack
-}
-
-func advanceToMin(it *Iterator, p *Node) *Node {
-	for p.llink != nullNodePtr {
-		it.s.Push(p)
-		p = p.llink
-	}
-	return p
-}
-
-func advanceToMax(it *Iterator, p *Node) *Node {
-	for p != nullNodePtr {
-		p = p.rlink
-	}
-	return p
-}
-
-func emptyStack(it *Iterator) {
-	for it.s.Len() > 0 {
-		it.s.Pop()
-	}
+	pos  int
+	N    int
 }
 
 func initialize(it *Iterator) {
-	if it.root != nullNodePtr {
-		it.curr = advanceToMin(it, it.root)
-	} else {
-		it.curr = nullNodePtr
+	if it.N < 0 {
+		return
 	}
+	it.curr = __choose(it.root, 0)
+	it.pos = 0
 }
 
 // Return a iterator on the treap tree
@@ -659,7 +641,8 @@ func NewIterator(tree *Treap) *Iterator {
 	it := &Iterator{
 		root: *tree.rootPtr,
 		curr: nil,
-		s:    stack.Stack{},
+		pos:  -1,
+		N:    tree.Size(),
 	}
 	initialize(it)
 	return it
@@ -667,19 +650,23 @@ func NewIterator(tree *Treap) *Iterator {
 
 // Reset the iterator to the first item of the set
 func (it *Iterator) ResetFirst() {
-	emptyStack(it)
 	initialize(it)
 }
 
 // Reset the iterator to the last item of the set
 func (it *Iterator) ResetLast() {
-	emptyStack(it)
-	advanceToMax(it, it.root)
+	if it.N == 0 {
+		panic("Tree is empty")
+	}
+	it.pos = it.N - 1
+	it.curr = __choose(it.root, it.pos)
 }
+
+func (it *Iterator) getPos() int { return it.pos }
 
 // Return true if iterator is positioned on an item. Otherwise it return false
 func (it *Iterator) HasCurr() bool {
-	return it.curr != nullNodePtr
+	return it.pos >= 0 && it.pos < it.N
 }
 
 // Return the current item on which the iterator is positioned. Panic if there is not current item
@@ -692,25 +679,35 @@ func (it *Iterator) GetCurr() interface{} {
 
 // Advance iterator to the next item in the ordered sequence
 func (it *Iterator) Next() *Iterator {
-	if !it.HasCurr() {
-		panic("Iterator has not current item")
+	if it.pos == it.N {
+		panic("Iterator overflow")
 	}
-	it.curr = it.curr.rlink
-	if it.curr != nullNodePtr {
-		it.curr = advanceToMin(it, it.curr)
+
+	it.pos++
+	if it.pos == it.N {
+		it.curr = nullNodePtr
 		return it
 	}
 
-	if it.s.Len() == 0 {
-		it.curr = nullNodePtr
-	} else {
-		it.curr = it.s.Pop().(*Node)
-	}
-
+	it.curr = __choose(it.root, it.pos)
 	return it
 }
 
-// TODO Implement Prev method
+// Advance iterator to the previous item in the ordered sequence
+func (it *Iterator) Prev() *Iterator {
+	if it.pos == -1 {
+		panic("Iterator underflow")
+	}
+
+	it.pos--
+	if it.pos == -1 {
+		it.curr = nullNodePtr
+		return it
+	}
+
+	it.curr = __choose(it.root, it.pos)
+	return it
+}
 
 // Simple BST checker; Not completely correct
 func checkBST(node *Node, less func(i1, i2 interface{}) bool) bool {
