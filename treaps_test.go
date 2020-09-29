@@ -57,7 +57,7 @@ func TestRandomInsertions(t *testing.T) {
 		assert.Equal(t, val, tree.Search(val))
 	}
 
-	assert.Equal(t, N, int(tree.Size()))
+	assert.Equal(t, N, tree.Size())
 }
 
 func TestTreap_remove(t *testing.T) {

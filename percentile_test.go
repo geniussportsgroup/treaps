@@ -14,7 +14,7 @@ type Sample struct {
 	height int // height in millimeters
 }
 
-const N = int(1e6)
+const N = int(1e7)
 
 func createSamples(n int) *Treap {
 
@@ -33,7 +33,7 @@ func createSamples(n int) *Treap {
 	// we will generate 1e6 samples of random heights according to a normal dist with mean 1600 mm
 	// and standard deviation of 400 mm/
 	// Pay attention to the fact that heights can be repeat. So we must use InsertDup
-	for id := 0; id < N; id++ {
+	for id := 0; id < n; id++ {
 		set.InsertDup(&Sample{
 			id:     id,
 			height: int(rand.NormFloat64()*400 + 1600),
@@ -66,6 +66,7 @@ func TestExample_99Percentiles(t *testing.T) {
 	p99 := set.ExtractRange(posOfPercentile99, set.Size()-1)
 
 	assert.Equal(t, percentile99Size, p99.Size())
+	assert.Equal(t, N-p99.Size(), set.Size())
 
 	for i, it := 0, NewIterator(p99); i < len(p99Slice); i, it = i+1, it.Next() {
 		assert.Equal(t, p99Slice[i].id, it.GetCurr().(*Sample).id)
