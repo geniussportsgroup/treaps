@@ -77,7 +77,8 @@ This example shows how to get the 99th percentile of a set
         percentile99Size := set.Size() - posOfPercentile99
 
         // First we can use the method choose(i) for getting all the samples. This way has complexity
-        // O(n log(N)) where n is the n ~ 0.01*N and N is the number of samples
+        // O(n log(N)) where n is the n ~ 0.01*N and N is the number of samples, which definitely is faster
+        // than O(N log N) in time and O(N) in space if you take the elements and sort them
         p99Slice := make([]Sample, 0)
         for i := posOfPercentile99; i < set.Size(); i++ {
             samplePtr := set.Choose(i)
@@ -85,7 +86,7 @@ This example shows how to get the 99th percentile of a set
         }
 
         // The second method is just to extract the whole percentile from the set, with the eventual
-        // disadvantage that the set is modified, but with the advantage that
+        // disadvantage that the set is modified, but with the advantage that that the set is gotten in O(log n)
         p99 := set.ExtractRange(posOfPercentile99, set.Size()-1)
 
         assert.Equal(t, percentile99Size, p99.Size())
