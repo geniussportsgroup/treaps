@@ -390,7 +390,7 @@ func (tree *Treap) Max() interface{} {
 func (tree *Treap) Size() int { return (*tree.rootPtr).count }
 
 // Helper function for splitting a tree according to key. The function returns two new trees.
-// tsRoot contains all the keys less than key and tgRoot contains the keys greater or equal to
+// tsRoot contains all the keys less or equal than key and tgRoot contains the keys greater to
 // key. The original tree in root remains in inconsistent state and it should not be used.
 func __splitByKeyDup(root *Node, key interface{},
 	less func(i1, i2 interface{}) bool) (tsRoot, tgRoot *Node) {
@@ -416,7 +416,7 @@ func __splitByKeyDup(root *Node, key interface{},
 }
 
 // SplitByKey tree in two trees tsTree and tgTres. tsTree contains all the keys of tree in
-// [tree.Min(), key> and tgTree contains those ones in [key, tree.Max]. After completion,
+// [tree.Min(), key) and tgTree contains those ones in [key, tree.Max]. After completion,
 // tree becomes empty.
 func (tree *Treap) SplitByKey(key interface{}) (tsTree, tgTree *Treap) {
 
@@ -464,6 +464,27 @@ func (tsTree *Treap) JoinExclusive(tgTree *Treap) {
 
 	*tsTree.rootPtr = __joinExclusive(tsTree.rootPtr, tgTree.rootPtr)
 	*tgTree.rootPtr = nullNodePtr
+}
+
+func __joinDup(rootPtr **Node, root *Node, less func(k1, k2 interface{}) bool) {
+
+	if root == nullNodePtr {
+		return
+	}
+
+	l, r := root.llink, root.rlink
+	root.llink, root.rlink, root.count = nullNodePtr, nullNodePtr, 1
+	*rootPtr = __insertNodeDup(*rootPtr, root, less)
+	__joinDup(rootPtr, l, less)
+	__joinDup(rootPtr, r, less)
+}
+
+// join rhs with tree. The result is equivalent to the union of tree and rhs
+// Notice that keys could be repeated. At the end of operation rhs becomes empty
+func (tree *Treap) joinDup(rhs *Treap) {
+
+	__joinDup(tree.rootPtr, *rhs.rootPtr, tree.less)
+	*rhs.rootPtr = nullNodePtr
 }
 
 func __choose(root *Node, pos int) *Node {
@@ -628,6 +649,7 @@ type Iterator struct {
 	N    int
 }
 
+// Initialize a treap iterator
 func initialize(it *Iterator) {
 	if it.N < 0 {
 		return
@@ -648,18 +670,32 @@ func NewIterator(tree *Treap) *Iterator {
 	return it
 }
 
+func NewReverseIterator(tree *Treap) *Iterator {
+	it := &Iterator{
+		root: *tree.rootPtr,
+		curr: nil,
+		pos:  -1,
+		N:    tree.Size(),
+	}
+
+	return it.ResetLast()
+}
+
 // Reset the iterator to the first item of the set
-func (it *Iterator) ResetFirst() {
+func (it *Iterator) ResetFirst() *Iterator {
 	initialize(it)
+	return it
 }
 
 // Reset the iterator to the last item of the set
-func (it *Iterator) ResetLast() {
+func (it *Iterator) ResetLast() *Iterator {
 	if it.N == 0 {
 		panic("Tree is empty")
 	}
 	it.pos = it.N - 1
 	it.curr = __choose(it.root, it.pos)
+
+	return it
 }
 
 func (it *Iterator) getPos() int { return it.pos }
@@ -765,7 +801,18 @@ func checkCounter(p *Node) bool {
 }
 
 func checkAll(p *Node, less func(i1, i2 interface{}) bool) bool {
-	return checkBST(p, less) && checkTreap(p) && checkCounter(p)
+
+	// put thus for making debugging easier
+	if !checkBST(p, less) {
+		return false
+	}
+	if !checkTreap(p) {
+		return false
+	}
+	if !checkCounter(p) {
+		return false
+	}
+	return true
 }
 
 func (tree *Treap) check() bool {
@@ -782,5 +829,5 @@ func (tree *Treap) check() bool {
 		return false
 	}
 
-	return true
+	return checkAll(*tree.rootPtr, tree.less)
 }

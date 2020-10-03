@@ -89,6 +89,9 @@ func TestTreap_split(t *testing.T) {
 	assert.Equal(t, N, t1.Size()+t2.Size())
 	assert.Equal(t, 0, tree.Size())
 
+	assert.True(t, t1.check())
+	assert.True(t, t2.check())
+
 	for it := NewIterator(t1); it.HasCurr(); it.Next() {
 		fmt.Print(it.GetCurr(), " ")
 	}
@@ -101,12 +104,15 @@ func TestTreap_split(t *testing.T) {
 
 	tree.JoinExclusive(t1)
 
+	assert.True(t, tree.check())
+
 	for it := NewIterator(tree); it.HasCurr(); it.Next() {
 		fmt.Print(it.GetCurr(), " ")
 	}
 	fmt.Println()
 
 	tree.JoinExclusive(t2)
+	assert.True(t, tree.check())
 	assert.Equal(t, 0, t1.Size())
 	assert.Equal(t, 0, t2.Size())
 
@@ -313,4 +319,51 @@ func TestTreap_IteratorNext(t *testing.T) {
 		assert.Equal(t, i, it.GetCurr())
 	}
 	assert.Equal(t, i, -1)
+}
+
+func TestNewReverseIterator(t *testing.T) {
+	tree := New(3, cmpInt)
+	const N = 10000
+	for i := 0; i < N; i++ {
+		tree.Insert(i)
+	}
+
+	i, it := N-1, NewReverseIterator(tree)
+	for ; it.HasCurr(); i, it = i-1, it.Prev() {
+		assert.Equal(t, i, it.GetCurr())
+	}
+	assert.Equal(t, i, -1)
+
+	for i, it = 0, it.Next(); it.HasCurr(); i, it = i+1, it.Next() {
+		assert.Equal(t, i, it.GetCurr())
+	}
+	assert.Equal(t, i, N)
+}
+
+func TestTreap_joinDup(t *testing.T) {
+
+	const N = 5
+	t1, t2 := NewTreap(cmpInt), NewTreap(cmpInt)
+
+	insertNRandomItems(t1, N)
+	insertNRandomItems(t2, N)
+
+	n1, n2 := t1.Size(), t2.Size()
+
+	t1.joinDup(t2)
+
+	assert.True(t, checkBST(*t1.rootPtr, t1.less))
+	assert.True(t, checkTreap(*t1.rootPtr))
+	assert.True(t, checkCounter(*t1.rootPtr))
+	assert.Equal(t, n1+n2, t1.Size())
+
+	for it := NewIterator(t1); it.HasCurr(); it.Next() {
+		fmt.Println(it.GetCurr(), " ")
+	}
+	fmt.Println()
+
+	assert.True(t, checkBST(*t1.rootPtr, t1.less))
+	assert.True(t, checkTreap(*t1.rootPtr))
+
+	assert.Equal(t, n1+n2, t1.Size())
 }
