@@ -342,7 +342,7 @@ func TestNewReverseIterator(t *testing.T) {
 
 func TestTreap_joinDup(t *testing.T) {
 
-	const N = 5
+	const N = 1000
 	t1, t2 := NewTreap(cmpInt), NewTreap(cmpInt)
 
 	insertNRandomItems(t1, N)
@@ -358,7 +358,7 @@ func TestTreap_joinDup(t *testing.T) {
 	assert.Equal(t, n1+n2, t1.Size())
 
 	for it := NewIterator(t1); it.HasCurr(); it.Next() {
-		fmt.Println(it.GetCurr(), " ")
+		fmt.Print(it.GetCurr(), " ")
 	}
 	fmt.Println()
 
@@ -366,4 +366,36 @@ func TestTreap_joinDup(t *testing.T) {
 	assert.True(t, checkTreap(*t1.rootPtr))
 
 	assert.Equal(t, n1+n2, t1.Size())
+}
+
+func TestTreap_union(t *testing.T) {
+
+}
+
+func Test_checkBST(t *testing.T) {
+
+	root := &Node{
+		key:      10,
+		priority: 0,
+		count:    0,
+		llink: &Node{
+			key:      5,
+			priority: 0,
+			count:    0,
+			llink:    nullNodePtr,
+			rlink:    nullNodePtr,
+		},
+		rlink: &Node{
+			key:      15,
+			priority: 0,
+			count:    0,
+			llink:    nullNodePtr,
+			rlink:    nullNodePtr,
+		},
+	}
+
+	assert.True(t, checkBST(root, cmpInt))
+
+	root.llink.key = 11
+	assert.False(t, checkBST(root, cmpInt))
 }

@@ -41,6 +41,24 @@ type Treap struct {
 	less          func(i1, i2 interface{}) bool
 }
 
+// helper for implementing == with < operation
+func __equal(i1, i2 interface{}, less func(i1, i2 interface{}) bool) bool {
+	return !less(i1, i2) && !less(i2, i1)
+}
+
+// helper for implementing <= with only < operation
+func __lessOrEqual(i1, i2 interface{}, less func(i1, i2 interface{}) bool) bool {
+	return less(i1, i2) || __equal(i1, i2, less)
+}
+
+func __greater(i1, i2 interface{}, less func(i1, i2 interface{}) bool) bool {
+	return less(i2, i1)
+}
+
+func __greaterOrEqual(i1, i2 interface{}, less func(i1, i2 interface{}) bool) bool {
+	return __greater(i1, i2, less) || __equal(i1, i2, less)
+}
+
 // Swap two treaps in O(1)
 func (tree *Treap) Swap(rhs *Treap) {
 	tree.seed, rhs.seed = rhs.seed, tree.seed
@@ -487,6 +505,38 @@ func (tree *Treap) joinDup(rhs *Treap) {
 	*rhs.rootPtr = nullNodePtr
 }
 
+// Union of root tree on tree pointer by rootPtr. Keys of root that are not in rootPtr are
+// copied without mutating root
+func __union(rootPtr **Node, root *Node, less func(k1, k2 interface{}) bool) {
+
+	if root == nullNodePtr {
+		return
+	}
+
+	p := &Node{
+		key:      root.key,
+		priority: root.priority,
+		count:    1,
+		llink:    nullNodePtr,
+		rlink:    nullNodePtr,
+	}
+
+	result := __insertNode(*rootPtr, p, less)
+	if result != nil {
+		*rootPtr = result
+	}
+	__union(rootPtr, root.llink, less)
+	__union(rootPtr, root.rlink, less)
+}
+
+// Do the union of keys of rhs with tree. The result is equivalent to the union of tree and rhs
+// Notice that keys should not be repeated. rhs is not mutated, key copies are inserted on tree
+func (tree *Treap) union(rhs *Treap) {
+
+	__union(tree.rootPtr, *rhs.rootPtr, tree.less)
+}
+
+// Return the pos-th node
 func __choose(root *Node, pos int) *Node {
 
 	for i := pos; i != root.llink.count; {
@@ -753,7 +803,7 @@ func checkBST(node *Node, less func(i1, i2 interface{}) bool) bool {
 	}
 
 	if node.llink != nullNodePtr {
-		if !less(node.llink.key, node.key) {
+		if !less(node.llink.key, node.key) && !__equal(node.llink.key, node.key, less) {
 			return false
 		}
 		if !checkBST(node.llink, less) {
@@ -762,7 +812,7 @@ func checkBST(node *Node, less func(i1, i2 interface{}) bool) bool {
 	}
 
 	if node.rlink != nullNodePtr {
-		if !less(node.key, node.rlink.key) {
+		if !less(node.key, node.rlink.key) && !__equal(node.key, node.rlink.key, less) {
 			return false
 		}
 		if !checkBST(node.rlink, less) {
