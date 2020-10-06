@@ -29,7 +29,7 @@ This example shows how to get the 99th percentile of a set
         "testing"
     )
 
-    // This example shows how to get the some percentiles of a sample of a million of random heights
+    // This example shows how to get the some percentiles of a sample of a ten millions of random heights
 
     // The following type simulate the representation of the height of a person
     type Sample struct {
@@ -50,7 +50,7 @@ This example shows how to get the 99th percentile of a set
             if !ok {
                 panic("Second parameter is not of type *Sample")
             }
-            return p1.height < p2.height
+            return p1.height < p2.height // sort by height
         })
 
         // we will generate 1e6 samples of random heights according to a normal dist with mean 1600 mm
