@@ -1,4 +1,4 @@
-# Golang Oredered Set
+# Golang Ordered Sets
 
 This package implements ordered sets implemented through Treaps. It accepts any type of key. 
 
