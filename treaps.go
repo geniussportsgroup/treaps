@@ -568,9 +568,9 @@ func __intersectionPrefix(root *Node, rhsPtr, result, diff1, diff2 **Node,
 	p1.reset() // children saved in l and r
 	p2 := __remove(rhsPtr, key, less)
 	if p2 != nullNodePtr { // is the key in both sets?
-		status := __insertNode(*result, p1, less)
-		if status != nil { // p1.key could be duplicated in rootPtr. In this case we delete
-			*result = __insertNode(*result, p1, less)
+		q := __insertNode(*result, p1, less)
+		if q != nil { // p1.key could be duplicated in rootPtr. In this case we delete
+			*result = q
 		}
 	} else {
 		*diff1 = __insertNodeDup(*diff1, p1, less)
