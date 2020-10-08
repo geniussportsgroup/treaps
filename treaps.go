@@ -20,6 +20,20 @@ type Node struct {
 	rlink    *Node       // right child pointer
 }
 
+func (p *Node) swap(q *Node) {
+	p.key, q.key = q.key, p.key
+	p.priority, q.priority = q.priority, p.priority
+	p.count, q.count = q.count, p.count
+	p.llink, q.llink = q.llink, p.llink
+	p.rlink, q.rlink = q.rlink, p.rlink
+}
+
+func (p *Node) reset() {
+	p.llink = nullNodePtr
+	p.rlink = nullNodePtr
+	p.count = 1
+}
+
 // This node, supposed to be immutable, represents the empty tree, as well as an
 // external node
 var nullNodePtr *Node = &Node{
@@ -61,14 +75,15 @@ func __greaterOrEqual(i1, i2 interface{}, less func(i1, i2 interface{}) bool) bo
 
 // Swap two treaps in O(1)
 func (tree *Treap) Swap(rhs *Treap) {
+
 	tree.seed, rhs.seed = rhs.seed, tree.seed
 	tree.randGenerator, rhs.randGenerator = rhs.randGenerator, tree.randGenerator
-	tree.rootPtr, rhs.rootPtr = rhs.rootPtr, tree.rootPtr
-	tree.headPtr, rhs.headPtr = rhs.headPtr, tree.headPtr
+	*tree.rootPtr, *rhs.rootPtr = *rhs.rootPtr, *tree.rootPtr
+	tree.less, rhs.less = rhs.less, tree.less
 }
 
 // Create a new treap with a random generator set to seed and comparison function less
-func New(seed int64, less func(i1, i2 interface{}) bool) *Treap {
+func New(seed int64, less func(i1, i2 interface{}) bool, items ...interface{}) *Treap {
 
 	src := rand.NewSource(seed)
 	tree := &Treap{
@@ -82,12 +97,16 @@ func New(seed int64, less func(i1, i2 interface{}) bool) *Treap {
 	tree.headPtr = &(tree.head)
 	tree.rootPtr = &(tree.headPtr.rlink)
 
+	for _, item := range items {
+		tree.InsertDup(item)
+	}
+
 	return tree
 }
 
 // Create a new tree with random seed chosen from system clock
-func NewTreap(less func(i1, i2 interface{}) bool) *Treap {
-	return New(time.Now().UTC().UnixNano(), less)
+func NewTreap(less func(i1, i2 interface{}) bool, items ...interface{}) *Treap {
+	return New(time.Now().UTC().UnixNano(), less, items...)
 }
 
 // Helper function that perform an exact topological Copy of tree rooted by p
@@ -347,16 +366,14 @@ func __remove(rootPtr **Node, key interface{}, less func(i1, i2 interface{}) boo
 	} else { // key found
 		retVal = *rootPtr // this node will be deleted
 		*rootPtr = __joinExclusive(&(*rootPtr).llink, &(*rootPtr).rlink)
+		retVal.reset()
 		return retVal
 	}
 
-	if retVal == nil {
+	if retVal == nullNodePtr {
 		return nullNodePtr // key not found
 	}
 
-	retVal.llink = nullNodePtr
-	retVal.rlink = nullNodePtr
-	retVal.count = 1
 	(*rootPtr).count--
 
 	return retVal
@@ -499,7 +516,7 @@ func __joinDup(rootPtr **Node, root *Node, less func(k1, k2 interface{}) bool) {
 
 // join rhs with tree. The result is equivalent to the union of tree and rhs
 // Notice that keys could be repeated. At the end of operation rhs becomes empty
-func (tree *Treap) joinDup(rhs *Treap) {
+func (tree *Treap) JoinDup(rhs *Treap) {
 
 	__joinDup(tree.rootPtr, *rhs.rootPtr, tree.less)
 	*rhs.rootPtr = nullNodePtr
@@ -522,7 +539,7 @@ func __union(rootPtr **Node, root *Node, less func(k1, k2 interface{}) bool) {
 	}
 
 	result := __insertNode(*rootPtr, p, less)
-	if result != nil {
+	if result != nullNodePtr {
 		*rootPtr = result
 	}
 	__union(rootPtr, root.llink, less)
@@ -530,10 +547,54 @@ func __union(rootPtr **Node, root *Node, less func(k1, k2 interface{}) bool) {
 }
 
 // Do the union of keys of rhs with tree. The result is equivalent to the union of tree and rhs
-// Notice that keys should not be repeated. rhs is not mutated, key copies are inserted on tree
-func (tree *Treap) union(rhs *Treap) {
+// Notice that keys should not be repeated. rhs is not mutated, key copies are inserted on tree.
+// At the end of operation the original sets become emtpy. If the keys are no repeated, then
+// diff1 and diff2 contain the exact differences
+func (tree *Treap) Union(rhs *Treap) {
 
 	__union(tree.rootPtr, *rhs.rootPtr, tree.less)
+}
+
+func __intersectionPrefix(root *Node, rhsPtr, result, diff1, diff2 **Node,
+	less func(k1, k2 interface{}) bool) {
+
+	if root == nullNodePtr {
+		return
+	}
+
+	key := root.key
+	l, r := root.llink, root.rlink
+	p1 := root
+	p1.reset() // children saved in l and r
+	p2 := __remove(rhsPtr, key, less)
+	if p2 != nullNodePtr { // is the key in both sets?
+		status := __insertNode(*result, p1, less)
+		if status != nil { // p1.key could be duplicated in rootPtr. In this case we delete
+			*result = __insertNode(*result, p1, less)
+		}
+	} else {
+		*diff1 = __insertNodeDup(*diff1, p1, less)
+	}
+
+	__intersectionPrefix(l, rhsPtr, result, diff1, diff2, less)
+	__intersectionPrefix(r, rhsPtr, result, diff1, diff2, less)
+}
+
+// Compute the intersection of tree with rhs. Intersection is put on result and remaining keys
+// are put on diff1 and diff2 respectively
+func (tree *Treap) Intersection(rhs *Treap) (result, diff1, diff2 *Treap) {
+
+	result = NewTreap(tree.less)
+	diff1 = NewTreap(tree.less)
+	diff2 = NewTreap(tree.less)
+
+	__intersectionPrefix(*tree.rootPtr, rhs.rootPtr, result.rootPtr,
+		diff1.rootPtr, diff2.rootPtr, tree.less)
+
+	*tree.rootPtr = nullNodePtr
+	diff2.JoinDup(rhs)
+
+	return
 }
 
 // Return the pos-th node
@@ -671,6 +732,32 @@ func (tree *Treap) ExtractRange(beginPos, endPos int) *Treap {
 	return result
 }
 
+func (tree *Treap) lexicographicCmp(rhs *Treap) int {
+
+	it1, it2 := NewIterator(tree), NewIterator(rhs)
+	for it1.HasCurr() && it2.HasCurr() {
+		item1 := it1.GetCurr()
+		item2 := it2.GetCurr()
+		if tree.less(item1, item2) {
+			return -1
+		} else if tree.less(item2, item1) {
+			return 1
+		}
+		it1.Next()
+		it2.Next()
+	}
+
+	if !it1.HasCurr() && !it2.HasCurr() {
+		return 0
+	}
+
+	if it1.HasCurr() {
+		return 1
+	}
+
+	return -1
+}
+
 // Rotate p to the right. Left child becomes root
 func rotateRight(p *Node) *Node {
 	q := p.llink
@@ -701,7 +788,7 @@ type Iterator struct {
 
 // Initialize a treap iterator
 func initialize(it *Iterator) {
-	if it.N < 0 {
+	if it.N <= 0 {
 		return
 	}
 	it.curr = __choose(it.root, 0)
@@ -867,6 +954,10 @@ func checkAll(p *Node, less func(i1, i2 interface{}) bool) bool {
 
 func (tree *Treap) check() bool {
 
+	if !checkSentinel() {
+		return false
+	}
+
 	if tree.head.llink != nullNodePtr {
 		return false
 	}
@@ -880,4 +971,9 @@ func (tree *Treap) check() bool {
 	}
 
 	return checkAll(*tree.rootPtr, tree.less)
+}
+
+func checkSentinel() bool {
+	return nullNodePtr.key == nil && nullNodePtr.llink == nil && nullNodePtr.rlink == nil &&
+		nullNodePtr.count == 0
 }

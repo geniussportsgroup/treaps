@@ -35,6 +35,8 @@ func TestTreap_insert(t *testing.T) {
 		ret := tree.Insert(i)
 		assert.NotNil(t, ret)
 	}
+
+	assert.True(t, tree.check())
 }
 
 func insertNRandomItems(tree *Treap, n int) {
@@ -58,6 +60,7 @@ func TestRandomInsertions(t *testing.T) {
 	}
 
 	assert.Equal(t, N, tree.Size())
+	assert.True(t, tree.check())
 }
 
 func TestTreap_remove(t *testing.T) {
@@ -69,13 +72,18 @@ func TestTreap_remove(t *testing.T) {
 	values := make([]int, 0, tree.Size())
 	for it := NewIterator(tree); it.HasCurr(); it.Next() {
 		values = append(values, it.GetCurr().(int))
+		fmt.Print(it.GetCurr(), " ")
 	}
+	fmt.Println()
 
 	for _, val := range values {
 		assert.Equal(t, val, tree.Search(val))
 		assert.Equal(t, val, tree.Remove(val))
+		assert.True(t, tree.check())
 		assert.Equal(t, nil, tree.Search(val))
 	}
+
+	assert.True(t, tree.check())
 }
 
 func TestTreap_split(t *testing.T) {
@@ -137,6 +145,9 @@ func TestTreap_searchOrInsert(t *testing.T) {
 		}
 	}
 
+	assert.True(t, tree.check())
+	assert.True(t, failures.check())
+
 	fmt.Println("tree.Size() = ", tree.Size())
 	fmt.Println("failures.Size() = ", failures.Size())
 
@@ -156,6 +167,8 @@ func TestTreap_choose(t *testing.T) {
 		assert.Equal(t, item, it.GetCurr())
 		i++
 	}
+
+	assert.True(t, tree.check())
 }
 
 func TestTreap_rank(t *testing.T) {
@@ -170,6 +183,8 @@ func TestTreap_rank(t *testing.T) {
 		assert.Equal(t, i, pos)
 		i++
 	}
+
+	assert.True(t, tree.check())
 }
 
 func TestTreap_splitPos(t *testing.T) {
@@ -183,6 +198,8 @@ func TestTreap_splitPos(t *testing.T) {
 
 	t1, t2 := tree.SplitByPosition(N / 2)
 
+	assert.True(t, t1.check())
+	assert.True(t, t2.check())
 	assert.Equal(t, 0, tree.Size())
 	assert.NotNil(t, t1)
 	assert.NotNil(t, t2)
@@ -202,6 +219,10 @@ func TestTreap_splitPos(t *testing.T) {
 	}
 
 	t0, t1 := t1.SplitByPosition(0)
+
+	assert.True(t, t0.check())
+	assert.True(t, t1.check())
+
 	for i, it := 0, NewIterator(t0); it.HasCurr(); i, it = i+1, it.Next() {
 		assert.Equal(t, i, it.GetCurr())
 	}
@@ -219,6 +240,8 @@ func TestTreap_SplitByPositionCorners(t *testing.T) {
 	}
 
 	t1, t2 := tree.SplitByPosition(tree.Size() - 1)
+	assert.True(t, t1.check())
+	assert.True(t, t2.check())
 	assert.Equal(t, N, t1.Size())
 	assert.Equal(t, 0, t2.Size())
 	for i, it := 0, NewIterator(t1); i < N; i, it = i+1, it.Next() {
@@ -226,6 +249,8 @@ func TestTreap_SplitByPositionCorners(t *testing.T) {
 	}
 
 	t1, t2 = t1.SplitByPosition(0)
+	assert.True(t, t1.check())
+	assert.True(t, t2.check())
 	assert.Equal(t, 1, t1.Size())
 	assert.Equal(t, N-1, t2.Size())
 	assert.Equal(t, 0, t1.Min())
@@ -234,6 +259,8 @@ func TestTreap_SplitByPositionCorners(t *testing.T) {
 	}
 
 	t1, t2 = t2.SplitByPosition(0)
+	assert.True(t, t1.check())
+	assert.True(t, t2.check())
 	assert.Equal(t, 1, t1.Size())
 	assert.Equal(t, 1, t1.Min())
 	assert.Equal(t, N-2, t2.Size())
@@ -242,6 +269,8 @@ func TestTreap_SplitByPositionCorners(t *testing.T) {
 	}
 
 	t1, t2 = t2.SplitByPosition(t2.Size() - 2)
+	assert.True(t, t1.check())
+	assert.True(t, t2.check())
 	assert.Equal(t, N-3, t1.Size())
 	assert.Equal(t, 1, t2.Size())
 	for it := NewIterator(t1); it.HasCurr(); it.Next() {
@@ -284,6 +313,9 @@ func TestTreap_removeRange(t *testing.T) {
 
 	midRange := tree.ExtractRange(40, 60)
 
+	assert.True(t, tree.check())
+	assert.True(t, midRange.check())
+
 	for key, it := 40, NewIterator(midRange); it.HasCurr(); it.Next() {
 		assert.Equal(t, key, it.GetCurr())
 		key++
@@ -298,8 +330,13 @@ func TestTreap_ExtractRangeCorners(t *testing.T) {
 	}
 
 	res := tree.ExtractRange(0, tree.Size()-1)
-	assert.Equal(t, N, res.Size())
-	assert.Equal(t, 0, tree.Size())
+	for it := NewIterator(res); it.HasCurr(); it.Next() {
+		fmt.Print(it.GetCurr(), " ")
+	}
+	fmt.Println()
+
+	assert.Equal(t, N-1, res.Size())
+	assert.Equal(t, 1, tree.Size())
 }
 
 func TestTreap_IteratorNext(t *testing.T) {
@@ -350,26 +387,37 @@ func TestTreap_joinDup(t *testing.T) {
 
 	n1, n2 := t1.Size(), t2.Size()
 
-	t1.joinDup(t2)
+	t1.JoinDup(t2)
 
-	assert.True(t, checkBST(*t1.rootPtr, t1.less))
-	assert.True(t, checkTreap(*t1.rootPtr))
-	assert.True(t, checkCounter(*t1.rootPtr))
+	assert.True(t, checkAll(*t1.rootPtr, t1.less))
 	assert.Equal(t, n1+n2, t1.Size())
+	assert.True(t, t1.check())
 
 	for it := NewIterator(t1); it.HasCurr(); it.Next() {
 		fmt.Print(it.GetCurr(), " ")
 	}
 	fmt.Println()
-
-	assert.True(t, checkBST(*t1.rootPtr, t1.less))
-	assert.True(t, checkTreap(*t1.rootPtr))
-
-	assert.Equal(t, n1+n2, t1.Size())
 }
 
-func TestTreap_union(t *testing.T) {
+func TestTreap_Union(t *testing.T) {
 
+	const N = 1000
+	t1, t2 := NewTreap(cmpInt), NewTreap(cmpInt)
+
+	insertNRandomItems(t1, N)
+	insertNRandomItems(t2, N)
+
+	n1, n2 := t1.Size(), t2.Size()
+
+	t1.Union(t2)
+
+	assert.True(t, t1.check())
+	assert.Equal(t, n2, t2.Size())
+	assert.Less(t, n1, t1.Size())
+
+	for it := NewIterator(t2); it.HasCurr(); it.Next() {
+		assert.Equal(t, it.GetCurr(), t1.Search(it.GetCurr()))
+	}
 }
 
 func Test_checkBST(t *testing.T) {
@@ -398,4 +446,129 @@ func Test_checkBST(t *testing.T) {
 
 	root.llink.key = 11
 	assert.False(t, checkBST(root, cmpInt))
+}
+
+func TestTreap_SimpleIntersection(t *testing.T) {
+
+	t1 := New(1, cmpInt, 1, 3, 5, 7, 9, 10, 11, 13, 15, 17, 19)
+	t2 := New(1, cmpInt, 2, 4, 6, 8, 9, 10, 12, 14, 16, 18, 20)
+
+	for it := NewIterator(t1); it.HasCurr(); it.Next() {
+		fmt.Print(it.GetCurr(), " ")
+	}
+	fmt.Println()
+
+	for it := NewIterator(t2); it.HasCurr(); it.Next() {
+		fmt.Print(it.GetCurr(), " ")
+	}
+	fmt.Println()
+
+	result, d1, d2 := t1.Intersection(t2)
+
+	assert.True(t, t1.check())
+	assert.True(t, t2.check())
+	assert.Equal(t, 0, t1.Size())
+	assert.Equal(t, 0, t2.Size())
+
+	for it := NewIterator(result); it.HasCurr(); it.Next() {
+		fmt.Print(it.GetCurr(), " ")
+	}
+	fmt.Println()
+
+	for it := NewIterator(d1); it.HasCurr(); it.Next() {
+		fmt.Print(it.GetCurr(), " ")
+	}
+	fmt.Println()
+
+	for it := NewIterator(d2); it.HasCurr(); it.Next() {
+		fmt.Print(it.GetCurr(), " ")
+	}
+	fmt.Println()
+}
+
+func TestTreap_Swap(t *testing.T) {
+
+	t1 := createSamples(10)
+	t2 := createSamples(15)
+
+	assert.True(t, t1.check())
+	assert.True(t, t2.check())
+
+	t1.Swap(t2)
+
+	assert.True(t, t1.check())
+	assert.True(t, t2.check())
+}
+
+func TestTreap_Intersection(t *testing.T) {
+	const N = 100000
+	t1, t2 := New(1, cmpInt), New(1, cmpInt)
+	insertNRandomItems(t1, N)
+	insertNRandomItems(t2, N)
+
+	c1 := t1.Copy()
+	c2 := t2.Copy()
+
+	inter, diff1, diff2 := t1.Intersection(t2)
+
+	assert.True(t, t1.check())
+	assert.True(t, t2.check())
+
+	assert.Equal(t, 0, t1.Size())
+	assert.Equal(t, 0, t2.Size())
+
+	for it := NewIterator(inter); it.HasCurr(); it.Next() {
+		curr := it.GetCurr()
+		assert.Equal(t, curr, c1.Search(curr))
+		assert.Equal(t, curr, c2.Search(curr))
+		assert.Equal(t, nil, diff1.Search(curr))
+		assert.Equal(t, nil, diff2.Search(curr))
+	}
+}
+
+func TestTreap_IntersectionCorners(t *testing.T) {
+
+	inter, d1, d2 := NewTreap(cmpInt).Intersection(NewTreap(cmpInt))
+	assert.Equal(t, 0, inter.Size())
+	assert.Equal(t, 0, d1.Size())
+	assert.Equal(t, 0, d2.Size())
+	assert.True(t, inter.check())
+	assert.True(t, d1.check())
+	assert.True(t, d2.check())
+
+	t1 := NewTreap(cmpInt, 1, 3, 5, 7, 9, 11, 13, 15, 17, 19)
+	t2 := NewTreap(cmpInt, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20)
+	c1, c2 := t1.Copy(), t2.Copy()
+	n1, n2 := t1.Size(), t2.Size()
+
+	inter, d1, d2 = t1.Intersection(t2)
+	assert.Equal(t, 0, inter.Size())
+	assert.True(t, inter.check())
+	assert.True(t, d1.check())
+	assert.True(t, d2.check())
+	assert.Equal(t, 0, t1.Size())
+	assert.Equal(t, 0, t2.Size())
+	assert.Equal(t, n1, d1.Size())
+	assert.Equal(t, n2, d2.Size())
+	assert.Equal(t, 0, c1.lexicographicCmp(d1))
+	assert.Equal(t, 0, c2.lexicographicCmp(d2))
+}
+
+func TestTreap_lexicographicCmp(t *testing.T) {
+
+	t1 := NewTreap(cmpInt, 1, 2, 3)
+	t2 := NewTreap(cmpInt, 1, 2)
+	t3 := NewTreap(cmpInt, 1)
+	t4 := NewTreap(cmpInt)
+
+	assert.Equal(t, 1, t1.lexicographicCmp(t2))
+	assert.Equal(t, -1, t2.lexicographicCmp(t1))
+
+	assert.Equal(t, -1, t4.lexicographicCmp(t3))
+	assert.Equal(t, -1, t4.lexicographicCmp(t2))
+	assert.Equal(t, -1, t4.lexicographicCmp(t1))
+
+	assert.Equal(t, 0, t1.lexicographicCmp(t1.Copy()))
+
+	assert.Equal(t, -1, t3.lexicographicCmp(t2))
 }
