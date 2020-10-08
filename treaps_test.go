@@ -37,6 +37,12 @@ func TestTreap_insert(t *testing.T) {
 	}
 
 	assert.True(t, tree.check())
+
+	// test that insert fails for duplicated key
+	for i := 0; i < N; i++ {
+		ret := tree.Insert(i)
+		assert.Nil(t, ret)
+	}
 }
 
 func insertNRandomItems(tree *Treap, n int) {
@@ -77,10 +83,11 @@ func TestTreap_remove(t *testing.T) {
 	fmt.Println()
 
 	for _, val := range values {
-		assert.Equal(t, val, tree.Search(val))
+		assert.Equal(t, val, tree.Search(val), "key must be in tree")
 		assert.Equal(t, val, tree.Remove(val))
 		assert.True(t, tree.check())
 		assert.Equal(t, nil, tree.Search(val))
+		assert.Nil(t, tree.Remove(val), "key already removed should fail")
 	}
 
 	assert.True(t, tree.check())
@@ -560,6 +567,7 @@ func TestTreap_lexicographicCmp(t *testing.T) {
 	t2 := NewTreap(cmpInt, 1, 2)
 	t3 := NewTreap(cmpInt, 1)
 	t4 := NewTreap(cmpInt)
+	t5 := NewTreap(cmpInt, 2, 3, 4)
 
 	assert.Equal(t, 1, t1.lexicographicCmp(t2))
 	assert.Equal(t, -1, t2.lexicographicCmp(t1))
@@ -571,4 +579,8 @@ func TestTreap_lexicographicCmp(t *testing.T) {
 	assert.Equal(t, 0, t1.lexicographicCmp(t1.Copy()))
 
 	assert.Equal(t, -1, t3.lexicographicCmp(t2))
+
+	assert.Equal(t, -1, t1.lexicographicCmp(t5))
+
+	assert.Equal(t, 1, t5.lexicographicCmp(t1))
 }

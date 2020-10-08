@@ -230,10 +230,6 @@ func __insertNodeDup(root, p *Node, less func(i1, i2 interface{}) bool) *Node {
 	resultNode := nullNodePtr
 	if less(p.key, root.key) {
 		resultNode = __insertNodeDup(root.llink, p, less)
-		if resultNode == nullNodePtr { // was p inserted?
-			return nullNodePtr // key is already in tree ==> insertion fails
-		}
-
 		root.llink = resultNode
 		root.count++
 		if resultNode.priority < root.priority {
@@ -243,10 +239,6 @@ func __insertNodeDup(root, p *Node, less func(i1, i2 interface{}) bool) *Node {
 	}
 
 	resultNode = __insertNodeDup(root.rlink, p, less)
-	if resultNode == nullNodePtr { // was p inserted?
-		return nullNodePtr // key is already in tree ==> insertion fails
-	}
-
 	root.rlink = resultNode
 	root.count++
 	if resultNode.priority < root.priority {
