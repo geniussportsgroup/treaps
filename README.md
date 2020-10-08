@@ -15,7 +15,7 @@ Given a set, the following operations are supported:
 
 ## Installation
 
-    go get -u https://github.com/geniussportsgroup/treaps
+    go get -u github.com/geniussportsgroup/treaps
     
 ## Example
 
