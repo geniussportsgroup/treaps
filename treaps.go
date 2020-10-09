@@ -105,12 +105,12 @@ func New(seed int64, less func(i1, i2 interface{}) bool, items ...interface{}) *
 }
 
 // Empty the set
-func (tree *Treap) clear() {
+func (tree *Treap) Clear() {
 	*tree.rootPtr = nullNodePtr
 }
 
 // Return true is set is empty
-func (tree *Treap) isEmpty() bool { return *tree.rootPtr == nullNodePtr }
+func (tree *Treap) IsEmpty() bool { return *tree.rootPtr == nullNodePtr }
 
 // Create a new tree with random seed chosen from system clock
 func NewTreap(less func(i1, i2 interface{}) bool, items ...interface{}) *Treap {
