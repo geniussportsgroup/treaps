@@ -383,6 +383,36 @@ func (tree *Treap) Remove(key interface{}) interface{} {
 	return retVal.key
 }
 
+func __removePos(rootPtr **Node, i int) *Node {
+
+	root := *rootPtr
+	var retVal *Node
+	if i == root.llink.count {
+		retVal = root
+		*rootPtr = __joinExclusive(&(*rootPtr).llink, &(*rootPtr).rlink)
+		retVal.reset()
+		return retVal
+	} else if i < root.llink.count {
+		retVal = __removePos(&(*rootPtr).llink, i)
+	} else {
+		retVal = __removePos(&(*rootPtr).rlink, i-(root.llink.count+1))
+	}
+
+	root.count--
+
+	return retVal
+}
+
+func (tree *Treap) RemoveByPos(i int) interface{} {
+
+	if i >= tree.Size() {
+		panic(fmt.Sprintf("Invalid position %d", i))
+	}
+
+	retVal := __removePos(tree.rootPtr, i)
+	return retVal.key
+}
+
 // Return the smallest item contained in the tree
 func (tree *Treap) Min() interface{} {
 
