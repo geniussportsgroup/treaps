@@ -584,3 +584,14 @@ func TestTreap_lexicographicCmp(t *testing.T) {
 
 	assert.Equal(t, 1, t5.lexicographicCmp(t1))
 }
+
+func TestTreap_RemoveByPos(t *testing.T) {
+
+	tree := NewTreap(cmpInt, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17)
+
+	assert.Equal(t, 0, tree.RemoveByPos(0))
+	assert.True(t, tree.check())
+
+	assert.Equal(t, 17, tree.RemoveByPos(16))
+	assert.True(t, tree.check())
+}
