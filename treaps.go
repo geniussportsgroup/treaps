@@ -1,6 +1,6 @@
 // Package Treap exports a ordered set of arbitrary keys implemented through treaps.
 // A treap is a kind of balanced binary Search tree where their operations are O(log n).
-package treaps
+package main
 
 import (
 	"fmt"
@@ -154,7 +154,6 @@ func __topologicalEqual(t1, t2 *Node, less func(i1, i2 interface{}) bool) bool {
 	}
 
 	if !(!less(t1.key, t2.key) && !less(t2.key, t1.key)) {
-		fmt.Println(t1.key, t2.key)
 		return false // keys are different
 	}
 
@@ -426,7 +425,7 @@ func (tree *Treap) Min() interface{} {
 
 	root := *tree.rootPtr
 	if root == nullNodePtr {
-		panic("Treap is empty")
+		return nil
 	}
 
 	for root.llink != nullNodePtr {
@@ -441,7 +440,7 @@ func (tree *Treap) Max() interface{} {
 
 	root := *tree.rootPtr
 	if root == nullNodePtr {
-		panic("Treap is empty")
+		return nil
 	}
 
 	for root.rlink != nullNodePtr {
@@ -577,7 +576,7 @@ func __union(rootPtr **Node, root *Node, less func(k1, k2 interface{}) bool) {
 }
 
 // Do the union of keys of rhs with tree. The result is equivalent to the union of tree and rhs
-// Notice that keys should not be repeated. rhs is not mutated, key copies are inserted on tree.
+// Notice that keys should not be repeated.
 // At the end of operation the original sets become emtpy. If the keys are no repeated, then
 // diff1 and diff2 contain the exact differences
 func (tree *Treap) Union(rhs *Treap) {
@@ -585,6 +584,8 @@ func (tree *Treap) Union(rhs *Treap) {
 	__union(tree.rootPtr, *rhs.rootPtr, tree.less)
 }
 
+// helper for intersecting. root tree is traversed in preorder and its nodes inserted into
+// the intersection result or in diff1. nodes of rhs belonging to the intersection are deleted.
 func __intersectionPrefix(root *Node, rhsPtr, result, diff1, diff2 **Node,
 	less func(k1, k2 interface{}) bool) {
 
