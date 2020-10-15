@@ -1,9 +1,12 @@
-package main
+package treaps
 
-import "fmt"
-import Set "github.com/geniussportsgroup/treaps"
+import (
+	"fmt"
+	Set "github.com/geniussportsgroup/treaps"
+	"testing"
+)
 
-func main() {
+func Test_Simple(t *testing.T) {
 
 	// we create a simple tree of 15 integer keys
 	tree := Set.NewTreap(func(i1, i2 interface{}) bool {
