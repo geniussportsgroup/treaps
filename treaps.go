@@ -1,6 +1,6 @@
 // Package Treap exports a ordered set of arbitrary keys implemented through treaps.
 // A treap is a kind of balanced binary Search tree where their operations are O(log n).
-package main
+package treaps
 
 import (
 	"fmt"
