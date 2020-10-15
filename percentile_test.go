@@ -1,4 +1,4 @@
-package treaps
+package main
 
 import (
 	"github.com/stretchr/testify/assert"
@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-// This example shows how to get the some percentiles of a sample of a million of random heights
+// This example shows how to get some percentiles of a sample of a 10 million of random heights
 
 // The following type simulate the representation of the height of a person
 type Sample struct {
@@ -32,7 +32,7 @@ func createSamples(n int) *Treap {
 
 	// we will generate 1e6 samples of random heights according to a normal dist with mean 1600 mm
 	// and standard deviation of 400 mm/
-	// Pay attention to the fact that heights can be repeat. So we must use InsertDup
+	// Pay attention to the fact that heights can repeat. So we must use InsertDup
 	for id := 0; id < n; id++ {
 		set.InsertDup(&Sample{
 			id:     id,
