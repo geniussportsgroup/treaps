@@ -55,7 +55,7 @@ This example shows how to get the 99th percentile of a set
 
         // we will generate 1e6 samples of random heights according to a normal dist with mean 1600 mm
         // and standard deviation of 400 mm/
-        // Pay attention to the fact that heights can be repeat. So we must use InsertDup
+        // Pay attention to the fact that heights can repeat. So we must use InsertDup
         for id := 0; id < n; id++ {
             set.InsertDup(&Sample{
                 id:     id,
@@ -86,7 +86,7 @@ This example shows how to get the 99th percentile of a set
         }
 
         // The second method is just to extract the whole percentile from the set, with the eventual
-        // disadvantage that the set is modified, but with the advantage that that the set is gotten in O(log n)
+        // disadvantage that the set is modified, but with the advantage that the set is gotten in O(log n)
         p99 := set.ExtractRange(posOfPercentile99, set.Size()-1)
 
         assert.Equal(t, percentile99Size, p99.Size())
