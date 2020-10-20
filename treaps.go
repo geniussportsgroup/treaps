@@ -153,7 +153,7 @@ func __topologicalEqual(t1, t2 *Node, less func(i1, i2 interface{}) bool) bool {
 		return false
 	}
 
-	if !(!less(t1.key, t2.key) && !less(t2.key, t1.key)) {
+	if !__equal(t1.key, t2.key, less) {
 		return false // keys are different
 	}
 
