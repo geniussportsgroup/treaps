@@ -871,7 +871,7 @@ func NewReverseIterator(tree *Treap) *Iterator {
 }
 
 // Reset the iterator to the first item of the set
-func (it *Iterator) ResetFirst() *Iterator {
+func (it *Iterator) ResetFirst() interface{} {
 	initialize(it)
 	return it
 }
