@@ -74,8 +74,9 @@ func __greaterOrEqual(i1, i2 interface{}, less func(i1, i2 interface{}) bool) bo
 }
 
 // Swap two treaps in O(1)
-func (tree *Treap) Swap(rhs *Treap) *Treap {
+func (tree *Treap) Swap(other interface{}) interface{} {
 
+	rhs := other.(*Treap)
 	tree.seed, rhs.seed = rhs.seed, tree.seed
 	tree.randGenerator, rhs.randGenerator = rhs.randGenerator, tree.randGenerator
 	*tree.rootPtr, *rhs.rootPtr = *rhs.rootPtr, *tree.rootPtr
