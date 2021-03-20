@@ -595,3 +595,27 @@ func TestTreap_RemoveByPos(t *testing.T) {
 	assert.Equal(t, 17, tree.RemoveByPos(16))
 	assert.True(t, tree.check())
 }
+
+func TestTreap_Traverse(t *testing.T) {
+
+	tree := New(3, cmpInt)
+	const N = 100
+	for i := 0; i < N; i++ {
+		tree.Insert(i)
+	}
+
+	acu := 0
+	assert.True(t, tree.Traverse(func(item interface{}) bool {
+		acu += item.(int)
+		return true
+	}))
+	assert.Equal(t, acu, N*(N-1)/2, "This is a gaussian sum")
+
+	acu = 0
+	assert.False(t, tree.Traverse(func(item interface{}) bool {
+		i := item.(int)
+		acu += i
+		return i < N/2
+	}))
+	assert.Equal(t, acu, (N/2+1)*(N/2)/2, "This is a gaussian sum")
+}

@@ -913,6 +913,22 @@ func (it *Iterator) Prev() *Iterator {
 	return it
 }
 
+// Traverse inorder the whole set and execute operation on each key.
+// The function stops if operation return false. Otherwise the function continues toward the
+// following key.
+// Return true if all the set was traversed, false otherwise.
+// WARNING: it is not supposed that operation might modify the key
+func (tree *Treap) Traverse(operation func(key interface{}) bool) bool {
+
+	for it := NewIterator(tree); it.HasCurr(); it.Next() {
+		if !operation(it.GetCurr()) {
+			return false
+		}
+	}
+
+	return true
+}
+
 // Simple BST checker; Not completely correct
 func checkBST(node *Node, less func(i1, i2 interface{}) bool) bool {
 
