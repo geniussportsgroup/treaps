@@ -217,11 +217,11 @@ func TestTreap_splitPos(t *testing.T) {
 	assert.Equal(t, min2, t2.Min())
 	assert.Equal(t, max2, t2.Max())
 
-	for i, it := 0, NewIterator(t1); it.HasCurr(); i, it = i+1, it.Next() {
+	for i, it := 0, NewIterator(t1); it.HasCurr(); i, it = i+1, it.Next().(*Iterator) {
 		assert.Equal(t, i, it.GetCurr().(int))
 	}
 
-	for i, it := N/2+1, NewIterator(t2); it.HasCurr(); i, it = i+1, it.Next() {
+	for i, it := N/2+1, NewIterator(t2); it.HasCurr(); i, it = i+1, it.Next().(*Iterator) {
 		assert.Equal(t, i, it.GetCurr().(int))
 	}
 
@@ -230,11 +230,11 @@ func TestTreap_splitPos(t *testing.T) {
 	assert.True(t, t0.check())
 	assert.True(t, t1.check())
 
-	for i, it := 0, NewIterator(t0); it.HasCurr(); i, it = i+1, it.Next() {
+	for i, it := 0, NewIterator(t0); it.HasCurr(); i, it = i+1, it.Next().(*Iterator) {
 		assert.Equal(t, i, it.GetCurr())
 	}
 
-	for i, it := 1, NewIterator(t1); it.HasCurr(); i, it = i+1, it.Next() {
+	for i, it := 1, NewIterator(t1); it.HasCurr(); i, it = i+1, it.Next().(*Iterator) {
 		assert.Equal(t, i, it.GetCurr())
 	}
 }
@@ -251,7 +251,7 @@ func TestTreap_SplitByPositionCorners(t *testing.T) {
 	assert.True(t, t2.check())
 	assert.Equal(t, N, t1.Size())
 	assert.Equal(t, 0, t2.Size())
-	for i, it := 0, NewIterator(t1); i < N; i, it = i+1, it.Next() {
+	for i, it := 0, NewIterator(t1); i < N; i, it = i+1, it.Next().(*Iterator) {
 		assert.Equal(t, i, it.GetCurr())
 	}
 
@@ -261,7 +261,7 @@ func TestTreap_SplitByPositionCorners(t *testing.T) {
 	assert.Equal(t, 1, t1.Size())
 	assert.Equal(t, N-1, t2.Size())
 	assert.Equal(t, 0, t1.Min())
-	for i, it := 1, NewIterator(t2); it.HasCurr(); i, it = i+1, it.Next() {
+	for i, it := 1, NewIterator(t2); it.HasCurr(); i, it = i+1, it.Next().(*Iterator) {
 		assert.Equal(t, i, it.GetCurr())
 	}
 
@@ -271,7 +271,7 @@ func TestTreap_SplitByPositionCorners(t *testing.T) {
 	assert.Equal(t, 1, t1.Size())
 	assert.Equal(t, 1, t1.Min())
 	assert.Equal(t, N-2, t2.Size())
-	for i, it := 2, NewIterator(t2); it.HasCurr(); i, it = i+1, it.Next() {
+	for i, it := 2, NewIterator(t2); it.HasCurr(); i, it = i+1, it.Next().(*Iterator) {
 		assert.Equal(t, i, it.GetCurr())
 	}
 
@@ -354,7 +354,7 @@ func TestTreap_IteratorNext(t *testing.T) {
 	}
 
 	i, it := 0, NewIterator(tree)
-	for ; it.HasCurr(); i, it = i+1, it.Next() {
+	for ; it.HasCurr(); i, it = i+1, it.Next().(*Iterator) {
 		assert.Equal(t, i, it.GetCurr())
 	}
 	assert.Equal(t, i, N)
@@ -378,7 +378,7 @@ func TestNewReverseIterator(t *testing.T) {
 	}
 	assert.Equal(t, i, -1)
 
-	for i, it = 0, it.Next(); it.HasCurr(); i, it = i+1, it.Next() {
+	for i, it = 0, it.Next().(*Iterator); it.HasCurr(); i, it = i+1, it.Next().(*Iterator) {
 		assert.Equal(t, i, it.GetCurr())
 	}
 	assert.Equal(t, i, N)

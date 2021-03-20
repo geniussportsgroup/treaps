@@ -69,7 +69,7 @@ func TestExample_99Percentiles(t *testing.T) {
 	assert.Equal(t, percentile99Size, p99.Size())
 	assert.Equal(t, N-p99.Size(), set.Size())
 
-	for i, it := 0, NewIterator(p99); i < len(p99Slice); i, it = i+1, it.Next() {
+	for i, it := 0, NewIterator(p99); i < len(p99Slice); i, it = i+1, it.Next().(*Iterator) {
 		assert.Equal(t, p99Slice[i].id, it.GetCurr().(*Sample).id)
 	}
 }
