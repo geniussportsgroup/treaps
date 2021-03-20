@@ -296,6 +296,11 @@ func (tree *Treap) Search(key interface{}) interface{} {
 	return root.key
 }
 
+// Return true if key is found in tree
+func (tree *Treap) Has(key interface{}) bool {
+	return tree.Search(key) != nil
+}
+
 // Helper function for searching a node and eventually Insert it into the tree if it is not found
 func __searchOrInsertNode(root **Node, p *Node, less func(i1, i2 interface{}) bool) *Node {
 

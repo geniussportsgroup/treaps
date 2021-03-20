@@ -619,3 +619,16 @@ func TestTreap_Traverse(t *testing.T) {
 	}))
 	assert.Equal(t, acu, (N/2+1)*(N/2)/2, "This is a gaussian sum")
 }
+
+func TestTreap_Has(t *testing.T) {
+
+	tree := New(3, cmpInt)
+	const N = 100
+	for i := 0; i < N; i++ {
+		tree.Insert(i)
+	}
+
+	assert.True(t, tree.Traverse(func(key interface{}) bool {
+		return tree.Has(key)
+	}), "Every key should return true when called on Has")
+}
