@@ -842,6 +842,11 @@ func initialize(it *Iterator) {
 	it.pos = 0
 }
 
+func (tree *Treap) CreateIterator() interface{} {
+
+	return NewIterator(tree)
+}
+
 // Return a iterator on the treap tree
 func NewIterator(tree *Treap) *Iterator {
 	it := &Iterator{
@@ -898,7 +903,7 @@ func (it *Iterator) GetCurr() interface{} {
 }
 
 // Advance iterator to the next item in the ordered sequence
-func (it *Iterator) Next() *Iterator {
+func (it *Iterator) Next() interface{} {
 	if it.pos == it.N {
 		panic("Iterator overflow")
 	}
