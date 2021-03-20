@@ -228,8 +228,12 @@ func (tree *Treap) Insert(item interface{}) interface{} {
 }
 
 // Append equivalent to insert. Put for supporting functional operations
-func (tree *Treap) Append(item interface{}) interface{} {
-	return tree.Insert(item)
+func (tree *Treap) Append(item interface{}, items ...interface{}) *Treap {
+	tree.Insert(item)
+	for _, i := range items {
+		tree.Insert(i)
+	}
+	return tree
 }
 
 // Helper for inserting node p into the tree root. BST order is handled through less function.
