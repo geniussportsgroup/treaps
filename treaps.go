@@ -228,7 +228,7 @@ func (tree *Treap) Insert(item interface{}) interface{} {
 }
 
 // Append equivalent to insert. Put for supporting functional operations
-func (tree *Treap) Append(item interface{}, items ...interface{}) *Treap {
+func (tree *Treap) Append(item interface{}, items ...interface{}) interface{} {
 	tree.Insert(item)
 	for _, i := range items {
 		tree.Insert(i)
