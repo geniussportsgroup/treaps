@@ -226,6 +226,11 @@ func (tree *Treap) Insert(item interface{}) interface{} {
 	return p.key
 }
 
+// Append equivalent to insert. Put for supporting functional operations
+func (tree *Treap) Append(item interface{}) interface{} {
+	return tree.Insert(item)
+}
+
 // Helper for inserting node p into the tree root. BST order is handled through less function.
 // key stored in p can be already present in the tree,. In this case, The key will be duplicated
 func __insertNodeDup(root, p *Node, less func(i1, i2 interface{}) bool) *Node {
