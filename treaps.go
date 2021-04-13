@@ -119,6 +119,10 @@ func NewTreap(less func(i1, i2 interface{}) bool, items ...interface{}) *Treap {
 	return New(time.Now().UTC().UnixNano(), less, items...)
 }
 
+func (tree *Treap) Create(items ...interface{}) interface{} {
+	return New(time.Now().UTC().UnixNano(), tree.Less, items...)
+}
+
 // Helper function that perform an exact topological Copy of tree rooted by p
 func __copy(p *Node) *Node {
 
@@ -135,7 +139,7 @@ func __copy(p *Node) *Node {
 	}
 }
 
-// Get an exact Copy of tree
+// Copy Get an exact Copy of tree
 func (tree *Treap) Copy() *Treap {
 
 	ret := New(tree.seed, tree.Less)
