@@ -11,7 +11,7 @@ import (
 
 const notFound = -1
 
-// The structure of every node
+// Node The structure of every node
 type Node struct {
 	key      interface{} // generic key
 	priority uint64      // priority value for heap order balancing
@@ -84,7 +84,7 @@ func (tree *Treap) Swap(other interface{}) interface{} {
 	return tree
 }
 
-// Create a new treap with a random generator set to seed and comparison function less
+// New Create a new treap with a random generator set to seed and comparison function less
 func New(seed int64, less func(i1, i2 interface{}) bool, items ...interface{}) *Treap {
 
 	src := rand.NewSource(seed)
@@ -106,17 +106,21 @@ func New(seed int64, less func(i1, i2 interface{}) bool, items ...interface{}) *
 	return tree
 }
 
-// Empty the set
+// Clear Empty the set
 func (tree *Treap) Clear() {
 	*tree.rootPtr = nullNodePtr
 }
 
-// Return true is set is empty
+// IsEmpty Return true is set is empty
 func (tree *Treap) IsEmpty() bool { return *tree.rootPtr == nullNodePtr }
 
-// Create a new tree with random seed chosen from system clock
+// NewTreap Create a new tree with random seed chosen from system clock
 func NewTreap(less func(i1, i2 interface{}) bool, items ...interface{}) *Treap {
 	return New(time.Now().UTC().UnixNano(), less, items...)
+}
+
+func (tree *Treap) Create(items ...interface{}) interface{} {
+	return New(time.Now().UTC().UnixNano(), tree.less, items...)
 }
 
 // Helper function that perform an exact topological Copy of tree rooted by p
