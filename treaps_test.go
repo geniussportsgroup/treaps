@@ -292,7 +292,7 @@ func TestTreap_copy(t *testing.T) {
 	const N = 100
 	insertNRandomItems(t1, N)
 
-	assert.True(t, checkBST(*t1.rootPtr, t1.less))
+	assert.True(t, checkBST(*t1.rootPtr, t1.Less))
 	assert.True(t, checkTreap(*t1.rootPtr))
 	assert.True(t, checkCounter(*t1.rootPtr))
 
@@ -396,7 +396,7 @@ func TestTreap_joinDup(t *testing.T) {
 
 	t1.JoinDup(t2)
 
-	assert.True(t, checkAll(*t1.rootPtr, t1.less))
+	assert.True(t, checkAll(*t1.rootPtr, t1.Less))
 	assert.Equal(t, n1+n2, t1.Size())
 	assert.True(t, t1.check())
 

@@ -52,7 +52,7 @@ type Treap struct {
 	rootPtr       **Node
 	head          Node // header node dummy parent of rootPtr
 	headPtr       *Node
-	less          func(i1, i2 interface{}) bool
+	Less          func(i1, i2 interface{}) bool
 }
 
 // helper for implementing == with < operation
@@ -80,7 +80,7 @@ func (tree *Treap) Swap(other interface{}) interface{} {
 	tree.seed, rhs.seed = rhs.seed, tree.seed
 	tree.randGenerator, rhs.randGenerator = rhs.randGenerator, tree.randGenerator
 	*tree.rootPtr, *rhs.rootPtr = *rhs.rootPtr, *tree.rootPtr
-	tree.less, rhs.less = rhs.less, tree.less
+	tree.Less, rhs.Less = rhs.Less, tree.Less
 	return tree
 }
 
@@ -91,7 +91,7 @@ func New(seed int64, less func(i1, i2 interface{}) bool, items ...interface{}) *
 	tree := &Treap{
 		seed:          seed,
 		randGenerator: rand.New(src),
-		less:          less,
+		Less:          less,
 	}
 
 	tree.head.llink = nullNodePtr
@@ -119,10 +119,6 @@ func NewTreap(less func(i1, i2 interface{}) bool, items ...interface{}) *Treap {
 	return New(time.Now().UTC().UnixNano(), less, items...)
 }
 
-func (tree *Treap) Create(items ...interface{}) interface{} {
-	return New(time.Now().UTC().UnixNano(), tree.less, items...)
-}
-
 // Helper function that perform an exact topological Copy of tree rooted by p
 func __copy(p *Node) *Node {
 
@@ -142,7 +138,7 @@ func __copy(p *Node) *Node {
 // Get an exact Copy of tree
 func (tree *Treap) Copy() *Treap {
 
-	ret := New(tree.seed, tree.less)
+	ret := New(tree.seed, tree.Less)
 	*ret.rootPtr = __copy(*tree.rootPtr)
 
 	return ret
@@ -169,7 +165,7 @@ func __topologicalEqual(t1, t2 *Node, less func(i1, i2 interface{}) bool) bool {
 
 // Return true if tree is topologically equivalent to rhs
 func (tree *Treap) TopologicalEqual(rhs *Treap) bool {
-	return __topologicalEqual(*tree.rootPtr, *rhs.rootPtr, tree.less)
+	return __topologicalEqual(*tree.rootPtr, *rhs.rootPtr, tree.Less)
 }
 
 // Helper for inserting node p into the tree root. BST order is handled through less function
@@ -223,7 +219,7 @@ func (tree *Treap) Insert(item interface{}) interface{} {
 		rlink:    nullNodePtr,
 	}
 
-	result := __insertNode(*tree.rootPtr, p, tree.less)
+	result := __insertNode(*tree.rootPtr, p, tree.Less)
 	if result == nullNodePtr {
 		return nil
 	}
@@ -282,7 +278,7 @@ func (tree *Treap) InsertDup(item interface{}) interface{} {
 		rlink:    nullNodePtr,
 	}
 
-	result := __insertNodeDup(*tree.rootPtr, p, tree.less)
+	result := __insertNodeDup(*tree.rootPtr, p, tree.Less)
 
 	*tree.rootPtr = result
 	return p.key
@@ -295,9 +291,9 @@ func (tree *Treap) Search(key interface{}) interface{} {
 	root := *tree.rootPtr
 	for root != nullNodePtr {
 
-		if tree.less(key, root.key) {
+		if tree.Less(key, root.key) {
 			root = root.llink
-		} else if tree.less(root.key, key) {
+		} else if tree.Less(root.key, key) {
 			root = root.rlink
 		} else {
 			break // key found!
@@ -361,7 +357,7 @@ func (tree *Treap) SearchOrInsert(item interface{}) (bool, interface{}) {
 		rlink:    nullNodePtr,
 	}
 
-	result := __searchOrInsertNode(tree.rootPtr, p, tree.less)
+	result := __searchOrInsertNode(tree.rootPtr, p, tree.Less)
 	if result != p {
 		return false, result.key
 	}
@@ -402,7 +398,7 @@ func __remove(rootPtr **Node, key interface{}, less func(i1, i2 interface{}) boo
 // Otherwise, the item was not found and the value nil is returned as signal of the failure
 func (tree *Treap) Remove(key interface{}) interface{} {
 
-	retVal := __remove(tree.rootPtr, key, tree.less)
+	retVal := __remove(tree.rootPtr, key, tree.Less)
 	if retVal == nullNodePtr {
 		return nil // key not found
 	}
@@ -504,10 +500,10 @@ func __splitByKeyDup(root *Node, key interface{},
 // tree becomes empty.
 func (tree *Treap) SplitByKey(key interface{}) (tsTree, tgTree *Treap) {
 
-	tsTree = New(tree.seed, tree.less)
-	tgTree = New(tree.seed, tree.less)
+	tsTree = New(tree.seed, tree.Less)
+	tgTree = New(tree.seed, tree.Less)
 
-	*tsTree.rootPtr, *tgTree.rootPtr = __splitByKeyDup(*tree.rootPtr, key, tree.less)
+	*tsTree.rootPtr, *tgTree.rootPtr = __splitByKeyDup(*tree.rootPtr, key, tree.Less)
 
 	*tree.rootPtr = nullNodePtr
 
@@ -542,7 +538,7 @@ func __joinExclusive(tsRootPtr, tgRootPtr **Node) *Node {
 // tgTree must be greater than tsTree. Panic is thrown if this condition is not met
 func (tsTree *Treap) JoinExclusive(tgTree *Treap) {
 
-	if tsTree.Size() != 0 && tgTree.Size() != 0 && !tsTree.less(tsTree.Max(), tgTree.Min()) {
+	if tsTree.Size() != 0 && tgTree.Size() != 0 && !tsTree.Less(tsTree.Max(), tgTree.Min()) {
 		panic("Trees are not range-disjoint")
 	}
 
@@ -567,7 +563,7 @@ func __joinDup(rootPtr **Node, root *Node, less func(k1, k2 interface{}) bool) {
 // Notice that keys could be repeated. At the end of operation rhs becomes empty
 func (tree *Treap) JoinDup(rhs *Treap) {
 
-	__joinDup(tree.rootPtr, *rhs.rootPtr, tree.less)
+	__joinDup(tree.rootPtr, *rhs.rootPtr, tree.Less)
 	*rhs.rootPtr = nullNodePtr
 }
 
@@ -601,7 +597,7 @@ func __union(rootPtr **Node, root *Node, less func(k1, k2 interface{}) bool) {
 // diff1 and diff2 contain the exact differences
 func (tree *Treap) Union(rhs *Treap) {
 
-	__union(tree.rootPtr, *rhs.rootPtr, tree.less)
+	__union(tree.rootPtr, *rhs.rootPtr, tree.Less)
 }
 
 // helper for intersecting. root tree is traversed in preorder and its nodes inserted into
@@ -635,12 +631,12 @@ func __intersectionPrefix(root *Node, rhsPtr, result, diff1, diff2 **Node,
 // are put on diff1 and diff2 respectively
 func (tree *Treap) Intersection(rhs *Treap) (result, diff1, diff2 *Treap) {
 
-	result = NewTreap(tree.less)
-	diff1 = NewTreap(tree.less)
-	diff2 = NewTreap(tree.less)
+	result = NewTreap(tree.Less)
+	diff1 = NewTreap(tree.Less)
+	diff2 = NewTreap(tree.Less)
 
 	__intersectionPrefix(*tree.rootPtr, rhs.rootPtr, result.rootPtr,
-		diff1.rootPtr, diff2.rootPtr, tree.less)
+		diff1.rootPtr, diff2.rootPtr, tree.Less)
 
 	*tree.rootPtr = nullNodePtr
 	diff2.JoinDup(rhs)
@@ -705,7 +701,7 @@ func __rank(root *Node, key interface{}, less func(i1, i2 interface{}) bool) int
 // The computation spends O(log n) expected time
 func (tree *Treap) RankInOrder(key interface{}) (ok bool, pos int) {
 
-	pos = __rank(*tree.rootPtr, key, tree.less)
+	pos = __rank(*tree.rootPtr, key, tree.Less)
 	ok = pos != notFound
 	return
 }
@@ -745,8 +741,8 @@ func (tree *Treap) SplitByPosition(i int) (ts, tg *Treap) {
 		panic(fmt.Sprintf("Position %d out of range", i))
 	}
 
-	ts = New(tree.seed, tree.less)
-	tg = New(tree.seed, tree.less)
+	ts = New(tree.seed, tree.Less)
+	tg = New(tree.seed, tree.Less)
 
 	if i == root.count-1 {
 		*ts.rootPtr = *tree.rootPtr
@@ -789,9 +785,9 @@ func (tree *Treap) lexicographicCmp(rhs *Treap) int {
 	for it1.HasCurr() && it2.HasCurr() {
 		item1 := it1.GetCurr()
 		item2 := it2.GetCurr()
-		if tree.less(item1, item2) {
+		if tree.Less(item1, item2) {
 			return -1
-		} else if tree.less(item2, item1) {
+		} else if tree.Less(item2, item1) {
 			return 1
 		}
 		it1.Next()
@@ -1042,7 +1038,7 @@ func (tree *Treap) check() bool {
 		return false
 	}
 
-	return checkAll(*tree.rootPtr, tree.less)
+	return checkAll(*tree.rootPtr, tree.Less)
 }
 
 func checkSentinel() bool {
